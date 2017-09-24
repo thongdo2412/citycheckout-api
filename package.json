@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "braintree": "^2.3.0",
+    "dotenv": "^4.0.0"
+  }
+}
