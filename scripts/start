@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export ACCOUNT_TABLE=networth-AccountTable-783HOLAIQIYD
+export HISTORY_TABLE=networth-HistoryTable-J9JBBZZP175U
+
+sam local start-api

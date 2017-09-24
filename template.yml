@@ -1,0 +1,239 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Net Worth API Lambda
+
+Resources:
+  NetWorthKMSAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/networth-api
+      TargetKeyId: !Ref NetWorthKMSKey
+
+  NetWorthKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "KMS key for networth"
+      KeyPolicy:
+        Id: "networth-api-kms"
+        Version: "2012-10-17"
+        Statement:
+          -
+            Sid: "Allow root user full admin of the key"
+            Effect: "Allow"
+            Action: '*'
+            Principal:
+              AWS: !Ref AWS::AccountId
+            Resource: '*'
+          -
+            Sid: "Allow Encryption Service to use this key"
+            Effect: "Allow"
+            Action:
+              - "kms:Encrypt"
+              - "kms:Decrypt"
+            Principal:
+              AWS:
+                - !GetAtt NetWorthLambdaRole.Arn
+                - Fn::Sub: arn:aws:iam::${AWS::AccountId}:user/networth
+            Resource: '*'
+
+  NetWorthLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+        Path: "/"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+          - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            -
+              Sid: "AllowLambdaServiceToAssumeRole"
+              Effect: "Allow"
+              Action:
+                - "sts:AssumeRole"
+              Principal:
+                Service:
+                  - "lambda.amazonaws.com"
+
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: networth-api
+      StageName: prod
+      CacheClusterEnabled: false
+      # TODO: enable cache and move in-line definition to swagger.yml
+      # CacheClusterSize: "0.5"
+      # DefinitionUri: swagger.yml
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title: !Ref AWS::StackName
+        securityDefinitions:
+          networth-cognito:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              providerARNs:
+                - !GetAtt UserPool.Arn
+              # - ${stageVariables.UserPoolArn}
+              type: cognito_user_pools
+        paths:
+          /api/{proxy+}:
+            x-amazon-apigateway-any-method:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NetWorthFunction.Arn}/invocations
+              responses: {}
+              security:
+                - networth-cognito: []
+            options:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    $ref: "#/definitions/Empty"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Headers:
+                      type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                passthroughBehavior: when_no_match
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                type: mock
+
+  ApiGatewayCognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: networth-cognito
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !GetAtt UserPool.Arn
+      RestApiId: !Ref ApiGatewayApi
+      Type: COGNITO_USER_POOLS
+
+  MyCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: nnetworth.com
+      SubjectAlternativeNames:
+        - '*.nnetworth.com'
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: NetWorthPool
+      AliasAttributes:
+        - preferred_username
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: networth-ui
+      GenerateSecret: false
+      UserPoolId: !Ref UserPool
+
+  CognitoIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: networth
+      AllowUnauthenticatedIdentities: true
+      CognitoIdentityProviders:
+        -
+          ClientId: !Ref UserPoolClient
+          ProviderName: cognito-idp.us-east-1.amazonaws.com/us-east-1_VoOz6xlnI
+
+  NetWorthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: networth-api
+      Handler: index.handler
+      Runtime: nodejs6.10
+      CodeUri: .
+      Description: Net Worth API Lambda
+      MemorySize: 128
+      Timeout: 300
+      Role: !GetAtt NetWorthLambdaRole.Arn
+      KmsKeyArn: !GetAtt NetWorthKMSKey.Arn
+      Environment:
+        Variables:
+          S3_BUCKET: nnetworth.com
+          ACCOUNT_TABLE: !Ref AccountTable
+          HISTORY_TABLE: !Ref HistoryTable
+          KMS_KEY_ALIAS: alias/networth-api
+          # TODO: need a better way to store these env secrets,
+          # maybe ignore from .env file and generate this template.yml on the fly
+          SLACK_WEBHOOK: AQICAHgdeGi09S+9uJ3PHgL8OGxlzPSLm25f8C9b3eQKyqQhBAGN4bnl73QXTkwwhTVPa1x2AAAAsDCBrQYJKoZIhvcNAQcGoIGfMIGcAgEAMIGWBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDLXvyijXElbstDMz6AIBEIBpmBpLyRyv4nK/kMhLPfCYyQBYCcrrqii++YDOOHYFLFO3OO+m/ZqVzCNEc3xXd/+AvWy0FgD1Zkre1pPQlKtWVqdJYKbxahwdcQPpu0wZcP7wtB9nljte/tvS0BNrFg8g1sWFuwSjM6uZ
+          PLAID_CLIENT_ID: AQICAHgdeGi09S+9uJ3PHgL8OGxlzPSLm25f8C9b3eQKyqQhBAHtpX8BrQKNcRNiYdJAIaKWAAAAdjB0BgkqhkiG9w0BBwagZzBlAgEAMGAGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMduFhJRHul0Bhko2eAgEQgDMJeVUU5basidyL+LSt8QebafRJ3VkHdTW17NYEwx1R5ku8qT4jTbIm17Itet70aSTOkvs=
+          PLAID_SECRET: AQICAHgdeGi09S+9uJ3PHgL8OGxlzPSLm25f8C9b3eQKyqQhBAFWnQ3fMIpZpOMIADvkl/5XAAAAfDB6BgkqhkiG9w0BBwagbTBrAgEAMGYGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMOogVofU0SIxPDbKhAgEQgDnBnOjsC68oTFpUlTJFnU4E4OCVj/v6dTCkznorGGccx0jgdv3TOz6HXgFK2g4YldRr9s6hBqb/Wug=
+          PLAID_PUBLIC_KEY: 7e599ac974fb8343f50fac8535fcf1
+          PLAID_ENV: development
+      Events:
+        GetApiProxyResource:
+          Type: Api
+          Properties:
+            Path: /api/{proxy+}
+            Method: any
+            RestApiId: !Ref ApiGatewayApi
+
+        Timer:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes)
+
+  AccountTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: key
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  HistoryTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+        -
+          AttributeName: username
+          KeyType: HASH
+        -
+          AttributeName: date
+          KeyType: RANGE
+      AttributeDefinitions:
+        -
+          AttributeName: "username"
+          AttributeType: "S"
+        -
+          AttributeName: "date"
+          AttributeType: "S"
+
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1

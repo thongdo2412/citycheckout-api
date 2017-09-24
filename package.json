@@ -1,6 +1,44 @@
 {
+  "name": "networth-api",
+  "version": "0.0.1",
+  "description": "Net Worth API",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nnetworth/networth-api.git"
+  },
+  "scripts": {
+    "watch": "./scripts/start",
+    "lint": "eslint *.js src/* test/*",
+    "test": "yarn lint && nyc mocha",
+    "cover": "nyc --reporter=lcov npm test",
+    "tail": "awslogs get /aws/lambda/networth-api ALL --watch --aws-region=us-east-1"
+  },
   "dependencies": {
+    "aws-sdk": "^2.121.0",
+    "aws-serverless-express": "^3.0.2",
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "dynamodb-data-types": "^3.0.0",
+    "express": "^4.15.4",
+    "jsonwebtoken": "^8.0.1",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "plaid": "^2.0.5",
+    "winston": "^2.3.1",
     "braintree": "^2.3.0",
     "dotenv": "^4.0.0"
+  },
+  "devDependencies": {
+    "aws-sam-local": "^0.2.2",
+    "coveralls": "^2.13.1",
+    "eslint": "^4.7.2",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.3.0",
+    "mocha": "^3.5.3",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^11.2.1"
   }
 }

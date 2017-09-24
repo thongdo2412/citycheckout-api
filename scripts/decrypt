@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+text=$1
+region='us-east-1'
+tmp_file='/tmp/decoded.txt'
+
+echo $text | base64 --decode > $tmp_file
+
+echo ''
+aws kms decrypt --output text --query Plaintext --ciphertext-blob fileb://$tmp_file | base64 --decode
+echo ''
+echo ''
