@@ -9,6 +9,7 @@
   },
   "scripts": {
     "watch": "./scripts/start",
+    "deploy": "./scripts/deploy",
     "lint": "eslint *.js src/* test/*",
     "test": "yarn lint && nyc mocha",
     "cover": "nyc --reporter=lcov npm test",
