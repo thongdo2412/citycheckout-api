@@ -41,9 +41,18 @@ Resources:
           Type: Api
           Properties:
             Path: /api/{proxy+}
-            Method: GET
+            Method: any
             # RestApiId: !Ref ApiGatewayApi
-
+        # GetApiProxyResource:
+        #   Type: Api
+        #   Properties:
+        #     Path: /api/{proxy+}
+        #     Method: POST
+        # GetApiProxyResource:
+        #   Type: Api
+        #   Properties:
+        #     Path: /api/{proxy+}
+        #     Method: PUT
         # Timer:
         #   Type: Schedule
         #   Properties:
