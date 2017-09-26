@@ -3,7 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: Net Worth API Lambda
 
 Resources:
-
   NetWorthLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -22,8 +21,57 @@ Resources:
               Principal:
                 Service:
                   - "lambda.amazonaws.com"
-
-
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: citycheckout-api
+      StageName: prod
+      CacheClusterEnabled: false
+      # TODO: enable cache and move in-line definition to swagger.yml
+      # CacheClusterSize: "0.5"
+      # DefinitionUri: swagger.yml
+      DefinitionBody:
+        swagger: 2.0
+        info:
+          title: !Ref AWS::StackName
+        paths:
+          /api/{proxy+}:
+            x-amazon-apigateway-any-method:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CityCheckoutFunction.Arn}/invocations
+              responses: {}
+            options:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    $ref: "#/definitions/Empty"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Headers:
+                      type: string
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                passthroughBehavior: when_no_match
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                type: mock
   CityCheckoutFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -34,7 +82,7 @@ Resources:
       Description: Net Worth API Lambda
       MemorySize: 128
       Timeout: 300
-      # Role: !GetAtt NetWorthLambdaRole.Arn
+      Role: !GetAtt CityCheckoutFunctionRole.Arn
       Policies: AmazonDynamoDBFullAccess
       Events:
         GetApiProxyResource:
@@ -42,17 +90,7 @@ Resources:
           Properties:
             Path: /api/{proxy+}
             Method: any
-            # RestApiId: !Ref ApiGatewayApi
-        # GetApiProxyResource:
-        #   Type: Api
-        #   Properties:
-        #     Path: /api/{proxy+}
-        #     Method: POST
-        # GetApiProxyResource:
-        #   Type: Api
-        #   Properties:
-        #     Path: /api/{proxy+}
-        #     Method: PUT
+            RestApiId: !Ref ApiGatewayApi
         # Timer:
         #   Type: Schedule
         #   Properties:
