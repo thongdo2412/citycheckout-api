@@ -82,7 +82,7 @@ Resources:
       Description: Net Worth API Lambda
       MemorySize: 128
       Timeout: 300
-      Role: !GetAtt CityCheckoutFunctionRole.Arn
+      Role: !GetAtt NetWorthLambdaRole.Arn
       Policies: AmazonDynamoDBFullAccess
       Events:
         GetApiProxyResource:

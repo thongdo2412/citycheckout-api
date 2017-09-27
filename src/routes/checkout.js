@@ -15,7 +15,7 @@ module.exports = [{
     var extendedAddress = req.body.extendedAddress;
     var city = req.body.city;
     var country = req.body.country;
-    var state = req.body.state;
+    var region = req.body.region;
     var postalCode = req.body.postalCode;
     var phone = req.body.phone;
 
@@ -46,7 +46,7 @@ module.exports = [{
         streetAddress: streetAddress,
         extendedAddress: extendedAddress,
         locality: city,
-        region: state,
+        region: region,
         postalCode: postalCode,
         countryCodeAlpha2: country
       },
@@ -57,7 +57,7 @@ module.exports = [{
         streetAddress: streetAddress,
         extendedAddress: extendedAddress,
         locality: city,
-        region: state,
+        region: region,
         postalCode: postalCode,
         countryCodeAlpha2: country
       },
