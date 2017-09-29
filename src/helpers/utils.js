@@ -1,6 +1,7 @@
 const plaid = require('plaid');
 const KMS = require('aws-sdk/clients/kms');
 const { DynamoTable } = require('../helpers/dynamo');
+const braintree = require("braintree");
 
 const kms = new KMS();
 
@@ -60,10 +61,20 @@ function getAccountTable(req) {
   return new DynamoTable(tableName, req.userInfo.username);
 }
 
+function getBrainTreeAuth() {
+  return braintree.connect({
+    environment: braintree.Environment.Sandbox,
+    merchantId: process.env.BT_MERCHANT_ID,
+    publicKey: process.env.BT_PUBLIC_KEY,
+    privateKey: process.env.BT_PRIVATE_KEY
+  });
+}
+
 module.exports = {
   getPlaid,
   decrypt,
   responseSuccess,
   responseError,
   getAccountTable,
+  getBrainTreeAuth,
 };

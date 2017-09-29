@@ -19,6 +19,7 @@
     "aws-sdk": "^2.121.0",
     "aws-serverless-express": "^3.0.2",
     "body-parser": "^1.18.2",
+    "bluebird": "^3.5.0",
     "cors": "^2.8.4",
     "dynamodb-data-types": "^3.0.0",
     "express": "^4.15.4",

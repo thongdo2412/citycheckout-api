@@ -1,4 +1,5 @@
-require('dotenv').config()
+const dotenv = require('dotenv');
+dotenv.load();
 const awsServerlessExpress = require('aws-serverless-express');
 const app = require('./src/app');
 

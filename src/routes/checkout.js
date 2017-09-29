@@ -1,5 +1,4 @@
-const { responseError, responseSuccess, getAccountTable, getPlaid } = require('../helpers/utils');
-const braintree = require("braintree");
+const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth } = require('../helpers/utils');
 module.exports = [{
   path: '/api/checkout',
   method: 'post',
@@ -19,59 +18,52 @@ module.exports = [{
     var postalCode = req.body.postalCode;
     var phone = req.body.phone;
 
-    const gateway = braintree.connect({
-      environment: braintree.Environment.Sandbox,
-      merchantId: process.env.BT_MERCHANT_ID,
-      publicKey: process.env.BT_PUBLIC_KEY,
-      privateKey: process.env.BT_PRIVATE_KEY
-    });
+    const gateway = getBrainTreeAuth();
 
     gateway.transaction.sale({
-      amount: amount,
-      paymentMethodNonce: nonce,
-      creditCard: {
-        cardholderName: nameOnCard
-      },
-      customer: {
-        firstName: firstname,
-        lastName: lastname,
-        company: company,
-        phone: phone,
-        email: email
-      },
-      billing: {
-        firstName: firstname,
-        lastName: lastname,
-        company: company,
-        streetAddress: streetAddress,
-        extendedAddress: extendedAddress,
-        locality: city,
-        region: region,
-        postalCode: postalCode,
-        countryCodeAlpha2: country
-      },
-      shipping: {
-        firstName: firstname,
-        lastName: lastname,
-        company: company,
-        streetAddress: streetAddress,
-        extendedAddress: extendedAddress,
-        locality: city,
-        region: region,
-        postalCode: postalCode,
-        countryCodeAlpha2: country
-      },
-      options: {
-        submitForSettlement: true,
-        storeInVaultOnSuccess: true
-      }
-    }, function (err, result) {
-      if (result.success || result.transaction) {
-        console.log("data is saved");
-      } else {
-        transactionErrors = result.errors.deepErrors();
-        req.flash('error', {msg: formatErrors(transactionErrors)});
-      }
+        amount: amount,
+        paymentMethodNonce: nonce,
+        creditCard: {
+          cardholderName: nameOnCard
+        },
+        customer: {
+          firstName: firstname,
+          lastName: lastname,
+          company: company,
+          phone: phone,
+          email: email
+        },
+        billing: {
+          firstName: firstname,
+          lastName: lastname,
+          company: company,
+          streetAddress: streetAddress,
+          extendedAddress: extendedAddress,
+          locality: city,
+          region: region,
+          postalCode: postalCode,
+          countryCodeAlpha2: country
+        },
+        shipping: {
+          firstName: firstname,
+          lastName: lastname,
+          company: company,
+          streetAddress: streetAddress,
+          extendedAddress: extendedAddress,
+          locality: city,
+          region: region,
+          postalCode: postalCode,
+          countryCodeAlpha2: country
+        },
+        options: {
+          submitForSettlement: true,
+          storeInVaultOnSuccess: true
+        }
+      })
+    .then(data => responseSuccess(res, data))
+    .catch((err) => {
+      const body = { error_message: `Problem in creating transactions. ${err.display_message}` };
+      responseError(res, body);
     });
   }
 }];
