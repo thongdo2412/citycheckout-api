@@ -3,20 +3,23 @@ module.exports = [{
   path: '/api/checkout',
   method: 'post',
   handler: (req, res) => {
-    var amount = req.body.amount;
-    var nonce = req.body.nonce;
-    var email = req.body.email;
-    var nameOnCard = req.body.nameoncard;
-    var firstname = req.body.firstname;
-    var lastname = req.body.lastname;
-    var company = req.body.company;
-    var streetAddress = req.body.streetAddress;
-    var extendedAddress = req.body.extendedAddress;
-    var city = req.body.city;
-    var country = req.body.country;
-    var region = req.body.region;
-    var postalCode = req.body.postalCode;
-    var phone = req.body.phone;
+    const amount = req.body.amount;
+    const nonce = req.body.nonce;
+    const email = req.body.email;
+    const nameOnCard = req.body.nameoncard;
+
+    //shipping address
+    const firstname = req.body.firstname;
+    const lastname = req.body.lastname;
+    const company = req.body.company;
+    const streetAddress = req.body.streetAddress;
+    const extendedAddress = req.body.extendedAddress;
+    const city = req.body.city;
+    const country = req.body.country;
+    const region = req.body.region;
+    const postalCode = req.body.postalCode;
+    const phone = req.body.phone;
+    //add billing address
 
     const gateway = getBrainTreeAuth();
 
@@ -57,7 +60,8 @@ module.exports = [{
         },
         options: {
           submitForSettlement: true,
-          storeInVaultOnSuccess: true
+          storeInVaultOnSuccess: true,
+          addBillingAddressToPaymentMethod: true
         }
       })
     .then(data => responseSuccess(res, data))
