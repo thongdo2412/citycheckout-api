@@ -19,7 +19,13 @@ module.exports = [{
     const region = req.body.region;
     const postalCode = req.body.postalCode;
     const phone = req.body.phone;
+    const product_id = req.body.product_id;
     //TODO: add billing address
+
+    // const payload = {
+    //   product:
+    // };
+    // Object.keys(payload).map(key => (payload[key].addedAt = Date.now()));
 
     const gateway = getBrainTreeAuth();
 

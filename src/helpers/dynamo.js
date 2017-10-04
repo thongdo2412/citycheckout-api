@@ -1,5 +1,5 @@
 const DynamoDB = require('aws-sdk/clients/dynamodb');
-const moment = require('moment');
+
 const dynamoDB = new DynamoDB.DocumentClient();
 
 function handleDynamoResponse(resolve, reject) {
@@ -15,7 +15,7 @@ function handleDynamoResponse(resolve, reject) {
 function generatePayload(payload, action) {
   const newPayload = payload;
 
-  // if (!('last_updated' in newPayload)) newPayload.last_updated = Date.now();
+  if (!('last_updated' in newPayload)) newPayload.last_updated = Date.now();
 
   Object.keys(newPayload).map(key => newPayload[key] = { // eslint-disable-line
     Value: newPayload[key],
@@ -26,18 +26,12 @@ function generatePayload(payload, action) {
 }
 
 class DynamoTable {
-  // constructor(tableName, username) {
-  //   this.tableName = tableName;
-  //   this.username = username;
-  // }
-
-  constructor(tableName, username, date) {
+  constructor(tableName, username) {
     this.tableName = tableName;
     this.username = username;
-    this.date = date;
   }
 
-  construcKey(field, date) {
+  construcKey(field) {
     let fields = field;
 
     if (fields.constructor !== 'Array') {
@@ -45,15 +39,14 @@ class DynamoTable {
     }
 
     return {
-      order_id: [this.username].concat(fields).join('|'),
-      date: date,
+      key: [this.username].concat(fields).join('|'),
     };
   }
 
-  simpleGet(field, date) {
+  simpleGet(field) {
     const params = {
       TableName: this.tableName,
-      Key: this.construcKey(field, date),
+      Key: this.construcKey(field),
     };
 
     return new Promise((resolve, reject) => {
@@ -70,10 +63,9 @@ class DynamoTable {
   }
 
   simpleUpdate(field, payload) {
-    date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params = {
       TableName: this.tableName,
-      Key: this.construcKey(field, date),
+      Key: this.construcKey(field),
       AttributeUpdates: generatePayload(payload, 'PUT'),
     };
 

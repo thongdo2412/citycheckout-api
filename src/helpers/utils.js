@@ -61,9 +61,9 @@ function getAccountTable(req) {
   return new DynamoTable(tableName, req.userInfo.username);
 }
 
-function getOrderTable(req, date) {
+function getOrderTable(req) {
   const tableName = process.env.ORDER_TABLE;
-  return new DynamoTable(tableName, req.body.email, date);
+  return new DynamoTable(tableName, req.body.email);
 }
 
 function getBrainTreeAuth() {
