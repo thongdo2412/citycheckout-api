@@ -1,6 +1,5 @@
 const { responseError, responseSuccess, getAccountTable } = require('../helpers/utils');
 
-
 module.exports = [
   {
     path: '/api/setting',

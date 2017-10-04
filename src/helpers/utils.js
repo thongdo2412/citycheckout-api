@@ -61,6 +61,11 @@ function getAccountTable(req) {
   return new DynamoTable(tableName, req.userInfo.username);
 }
 
+function getOrderTable(req, date) {
+  const tableName = process.env.ORDER_TABLE;
+  return new DynamoTable(tableName, req.body.email, date);
+}
+
 function getBrainTreeAuth() {
   return braintree.connect({
     environment: braintree.Environment.Sandbox,
@@ -77,4 +82,5 @@ module.exports = {
   responseError,
   getAccountTable,
   getBrainTreeAuth,
+  getOrderTable,
 };

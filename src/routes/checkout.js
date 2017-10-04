@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth } = require('../helpers/utils');
+const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
 module.exports = [{
   path: '/api/checkout',
   method: 'post',
@@ -19,7 +19,7 @@ module.exports = [{
     const region = req.body.region;
     const postalCode = req.body.postalCode;
     const phone = req.body.phone;
-    //add billing address
+    //TODO: add billing address
 
     const gateway = getBrainTreeAuth();
 
