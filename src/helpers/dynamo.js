@@ -66,10 +66,24 @@ class DynamoTable {
     put(payload) {
       const params ={
         TableName: this.tableName,
-        Item: generatePayload(payload)
+        Item: payload
       };
+      console.log(params);
       return new Promise((resolve, reject) => {
         dynamoDB.put(params, handleDynamoResponse(resolve, reject));
+      });
+    }
+
+    get(key,date) {
+      const params = {
+        TableName: this.tableName,
+        Key: {
+          "key": key,
+          "date": date
+        }
+      };
+      return new Promise((resolve, reject) => {
+        dynamoDB.get(params, handleDynamoResponse(resolve, reject));
       });
     }
 

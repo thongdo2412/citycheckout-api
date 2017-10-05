@@ -58,18 +58,28 @@ module.exports = [{
       countryCodeAlpha2: country
     };
 
+    // const items = {
+    //   "key": email,
+    //   "date": date,
+    //   "product": product,
+    //   "customer": customer,
+    //   "shippingAddress": shippingAddress,
+    //   "billingAddress": billingAddress,
+    //   "clickid": clickId,
+    //   "sent": false
+    // };
     const items = {
-      key: email,
-      date: date,
-      product: product,
-      customer: customer,
-      shippingAddress: shippingAddress,
-      billingAddress: billingAddress,
-      clickid: clickId,
-      sent: false
-    };
+     HashKey: email,
+     RangeKey: date,
+     NumAttribute: 1,
+     BoolAttribute: true,
+     ListAttribute: [1, 'two', false],
+     MapAttribute: { foo: 'bar'},
+     NullAttribute: null
+  }
 
-  getOrderTable().put(items)
+  // getOrderTable().put(items)
+  getOrderTable().get('test@example.com', '2017-10-04T9:33:29:789')
   .then(data => responseSuccess(res, data))
   .catch(err => responseError(res, err));
   // .then(function(val){
