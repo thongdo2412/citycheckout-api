@@ -1,4 +1,5 @@
 const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
+const moment = require('moment');
 module.exports = [{
   path: '/api/checkout',
   method: 'post',
@@ -19,61 +20,110 @@ module.exports = [{
     const region = req.body.region;
     const postalCode = req.body.postalCode;
     const phone = req.body.phone;
-    const product_id = req.body.product_id;
+    const product = req.body.product;
+    const clickId = req.body.voluumClickID;
     //TODO: add billing address
 
-    // const payload = {
-    //   product:
-    // };
-    // Object.keys(payload).map(key => (payload[key].addedAt = Date.now()));
+    const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
 
-    const gateway = getBrainTreeAuth();
+    const customer = {
+      firstName: firstname,
+      lastName: lastname,
+      company: company,
+      phone: phone,
+      email: email
+    };
 
-    gateway.transaction.sale({
-        amount: amount,
-        paymentMethodNonce: nonce,
-        creditCard: {
-          cardholderName: nameOnCard
-        },
-        customer: {
-          firstName: firstname,
-          lastName: lastname,
-          company: company,
-          phone: phone,
-          email: email
-        },
-        billing: {
-          firstName: firstname,
-          lastName: lastname,
-          company: company,
-          streetAddress: streetAddress,
-          extendedAddress: extendedAddress,
-          locality: city,
-          region: region,
-          postalCode: postalCode,
-          countryCodeAlpha2: country
-        },
-        shipping: {
-          firstName: firstname,
-          lastName: lastname,
-          company: company,
-          streetAddress: streetAddress,
-          extendedAddress: extendedAddress,
-          locality: city,
-          region: region,
-          postalCode: postalCode,
-          countryCodeAlpha2: country
-        },
-        options: {
-          submitForSettlement: true,
-          storeInVaultOnSuccess: true,
-          addBillingAddressToPaymentMethod: true
-        }
-      })
-    .then(data => responseSuccess(res, data))
-    .catch((err) => {
-      const body = { error_message: `Problem in creating transactions. ${err.display_message}` };
-      responseError(res, body);
-    });
+    const shippingAddress = {
+      firstName: firstname,
+      lastName: lastname,
+      company: company,
+      streetAddress: streetAddress,
+      extendedAddress: extendedAddress,
+      locality: city,
+      region: region,
+      postalCode: postalCode,
+      countryCodeAlpha2: country
+    };
+
+    const billingAddress = {
+      firstName: firstname,
+      lastName: lastname,
+      company: company,
+      streetAddress: streetAddress,
+      extendedAddress: extendedAddress,
+      locality: city,
+      region: region,
+      postalCode: postalCode,
+      countryCodeAlpha2: country
+    };
+
+    const items = {
+      key: email,
+      date: date,
+      product: product,
+      customer: customer,
+      shippingAddress: shippingAddress,
+      billingAddress: billingAddress,
+      clickid: clickId,
+      sent: false
+    };
+
+  getOrderTable().put(items)
+  .then(data => responseSuccess(res, data))
+  .catch(err => responseError(res, err));
+  // .then(function(val){
+  //   const gateway = getBrainTreeAuth();
+  //
+  //   gateway.transaction.sale({
+  //       amount: amount,
+  //       paymentMethodNonce: nonce,
+  //       creditCard: {
+  //         cardholderName: nameOnCard
+  //       },
+  //       customer: {
+  //         firstName: firstname,
+  //         lastName: lastname,
+  //         company: company,
+  //         phone: phone,
+  //         email: email
+  //       },
+  //       billing: {
+  //         firstName: firstname,
+  //         lastName: lastname,
+  //         company: company,
+  //         streetAddress: streetAddress,
+  //         extendedAddress: extendedAddress,
+  //         locality: city,
+  //         region: region,
+  //         postalCode: postalCode,
+  //         countryCodeAlpha2: country
+  //       },
+  //       shipping: {
+  //         firstName: firstname,
+  //         lastName: lastname,
+  //         company: company,
+  //         streetAddress: streetAddress,
+  //         extendedAddress: extendedAddress,
+  //         locality: city,
+  //         region: region,
+  //         postalCode: postalCode,
+  //         countryCodeAlpha2: country
+  //       },
+  //       options: {
+  //         submitForSettlement: true,
+  //         storeInVaultOnSuccess: true,
+  //         addBillingAddressToPaymentMethod: true
+  //       }
+  //     })
+  //   })
+    // .catch((err) => {
+    //   const body = { error_message: `Problem in creating transactions. ${err.display_message}` };
+    //   responseError(res, body);
+    // });
+    // .catch((e) => {
+    //   responseError(res, e);
+    // });
+
   }
 }];

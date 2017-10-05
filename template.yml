@@ -101,14 +101,14 @@ Resources:
     Properties:
       KeySchema:
         -
-          AttributeName: order_id
+          AttributeName: key
           KeyType: HASH
         -
           AttributeName: date
           KeyType: RANGE
       AttributeDefinitions:
         -
-          AttributeName: "order_id"
+          AttributeName: "key"
           AttributeType: "S"
         -
           AttributeName: "date"
