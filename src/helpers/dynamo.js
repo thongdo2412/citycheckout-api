@@ -25,7 +25,7 @@ class DynamoTable {
         .then(item => Promise.resolve(item.Item))
   }
 
-  put(key,amount,clickid, mapCustomer, mapBilling, mapShipping, mapProduct) {
+  put(key, amount, clickid, mapCustomer, mapBilling, mapShipping, mapProduct) {
     const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params ={
       TableName : this.tableName,
@@ -42,27 +42,24 @@ class DynamoTable {
       }
     }
     return db.put(params).promise()
+    .then(item => Promise.resolve(item.Item))
   }
 
   query (key){
     //TODO: this is not done, finish this method
-
     const MS_PER_MINUTE = 60000;
-    const myStartDate = moment(new Date(Date.now() - 45 * MS_PER_MINUTE));
-    const timeNow = moment().format('YYYY-MM-DDTHH:mm:ss:SSS')
-    console.log(moment().format())
-    console.log(myStartDate)
+    const myStartDate = new Date(Date.now() - 45 * MS_PER_MINUTE);
+    console.log(typeof(myStartDate))
     const params = {
       TableName : this.tableName,
-      KeyConditionExpression: "#hk = :hkey and date between :date1 and :date2",
-      ExpressionAttributeNames:{
-        "#hk": "key"
-      },
-      ExpressionAttributeValues: {
-        ":yyyy":key,
-        ":date1": myStartDate,
-        ":date2": timeNow
-      }
+      "key": key,
+
+      // KeyConditions: {
+      //   'date': {
+      //     ComparisonOperator: 'GE',
+      //     AttributeValueList: myStartDate
+      //   }
+      // }
     }
     return db.query(params).promise()
   }
@@ -72,7 +69,6 @@ class DynamoTable {
       FilterExpression: `${field} = :field`,
       ExpressionAttributeValues : {':field' : fieldValue}
     }
-    console.log(params)
     return db.scan(params).promise()
   }
 

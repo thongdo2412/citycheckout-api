@@ -8,8 +8,14 @@ module.exports = [{
     // data = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const amount = 10.00
     const token = "g3vshy"
-    // getOrderTable().scan('sent',false)
-    getOrderTable().updateSentField( "test1@example.com", "2017-10-07T00:04:28:439")
+    const product = {
+      id: 44739029702,
+      price: "35.00",
+      sku: "CITYADVCLR-FULL-1x"
+    }
+    getOrderTable().put("test4@example.com",amount,"abcd12345",{},{},{},product)
+    // getOrderTable().scan("sent",false)
+    // getOrderTable().query("test2@example.com")
     .then(data  => responseSuccess(res, data))
     // .then(data => {
     //   const gateway = getBrainTreeAuth();

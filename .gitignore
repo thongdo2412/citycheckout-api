@@ -5,7 +5,7 @@ citycheckout.env
 .sourcemaps/
 platforms/
 plugins/
-
+*ngrok*
 # Logs
 logs
 *.log
