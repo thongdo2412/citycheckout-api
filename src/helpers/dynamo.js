@@ -1,32 +1,9 @@
-const DynamoDB = require('aws-sdk/clients/dynamodb');
 const config = require('../config');
-const dynamoDB = new DynamoDB.DocumentClient();
-// const db = new DynamoDB.DocumentClient();
+const AWS = config.AWS
+const db = new AWS.DynamoDB.DocumentClient()
 const _ = require('lodash');
 const moment = require('moment');
 const Promise = require('bluebird');
-
-function handleDynamoResponse(resolve, reject) {
-  return (err, data) => {
-    if (err) {
-      reject(err);
-    } else {
-      resolve(data.Item);
-    }
-  };
-}
-
-function generatePayload(payload) {
-  // const newPayload = payload;
-
-  // if (!('last_updated' in newPayload)) newPayload.last_updated = Date.now();
-
-  // Object.keys(newPayload).map(key => newPayload[key] = { // eslint-disable-line
-  //   Value: newPayload[key],
-  //   Action: action,
-  // });
-  return JSON.stringify(payload);
-}
 
 class DynamoTable {
   constructor() {
@@ -36,86 +13,84 @@ class DynamoTable {
     this.sortKey = this.config.db.tables.order.sort
   }
 
-    construcKey(key, date) {
-      const Keys = {
-        key: key,
-        date: date
-      };
-      return JSON.stringify(Keys);
+  get(key, date) {
+    const params ={
+      TableName : this.tableName,
+      Key: {
+        "key": key,
+        "date": date
+      }
+    };
+    return db.get(params).promise()
+        .then(item => Promise.resolve(item.Item))
+  }
+
+  put(key,amount,clickid, mapCustomer, mapBilling, mapShipping, mapProduct) {
+    const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
+    const params ={
+      TableName : this.tableName,
+      Item: {
+        "key": key,
+        "date": date,
+        "click_id": clickid,
+        customer: mapCustomer,
+        billing: mapBilling,
+        shipping: mapShipping,
+        product: mapProduct,
+        amount: amount,
+        sent: false
+      }
     }
+    return db.put(params).promise()
+  }
 
-    // simpleGet(key, date) {
-    //   const params = {
-    //     TableName: this.tableName,
-    //     Key: this.construcKey(key, date),
-    //   };
-    //
-    //   return new Promise((resolve, reject) => {
-    //     dynamoDB.get(params, handleDynamoResponse(resolve, reject));
-    //   })
-    //     .then((res) => {
-    //       if (!res) throw Error('Not found.');
-    //
-    //       // const data = res;
-    //       // if (data instanceof Object && 'key' in data) delete data.key;
-    //
-    //       return res;
-    //     });
-    // }
+  query (key){
+    //TODO: this is not done, finish this method
 
-    put(payload) {
-      const params ={
-        TableName: this.tableName,
-        Item: payload
-      };
-      console.log(params);
-      return new Promise((resolve, reject) => {
-        dynamoDB.put(params, handleDynamoResponse(resolve, reject));
-      });
+    const MS_PER_MINUTE = 60000;
+    const myStartDate = moment(new Date(Date.now() - 45 * MS_PER_MINUTE));
+    const timeNow = moment().format('YYYY-MM-DDTHH:mm:ss:SSS')
+    console.log(moment().format())
+    console.log(myStartDate)
+    const params = {
+      TableName : this.tableName,
+      KeyConditionExpression: "#hk = :hkey and date between :date1 and :date2",
+      ExpressionAttributeNames:{
+        "#hk": "key"
+      },
+      ExpressionAttributeValues: {
+        ":yyyy":key,
+        ":date1": myStartDate,
+        ":date2": timeNow
+      }
     }
-
-    get(key,date) {
-      const params = {
-        TableName: this.tableName,
-        Key: {
-          "key": key,
-          "date": date
-        }
-      };
-      return new Promise((resolve, reject) => {
-        dynamoDB.get(params, handleDynamoResponse(resolve, reject));
-      });
+    return db.query(params).promise()
+  }
+  scan(field,fieldValue) {
+    const params = {
+      TableName: this.tableName,
+      FilterExpression: `${field} = :field`,
+      ExpressionAttributeValues : {':field' : fieldValue}
     }
+    console.log(params)
+    return db.scan(params).promise()
+  }
 
-    // simpleUpdate(key, date, payload) {
-    //   const params = {
-    //     TableName: this.tableName,
-    //     Key: this.construcKey(key, date),
-    //     AttributeUpdates: generatePayload(payload, 'PUT'),
-    //   };
-    //   return new Promise((resolve, reject) => {
-    //     dynamoDB.update(params, handleDynamoResponse(resolve, reject));
-    //   });
-    // }
-    //
-    // addToSet(field, date, attribute, value) {
-    //   const params = {
-    //     TableName: this.tableName,
-    //     Key: this.construcKey(field, date),
-    //     UpdateExpression: `ADD ${attribute} :value`,
-    //     ExpressionAttributeValues: { ':value': dynamoDB.createSet([value]) },
-    //   };
-    //
-    //   return new Promise((resolve, reject) => {
-    //     dynamoDB.update(params, (err, data) => {
-    //       if (err) {
-    //         reject(err);
-    //       } else {
-    //         resolve(data.Item);
-    //       }
-    //     });
-    //   });
-    // }
+  updateSentField(key, date) {
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        "key" : key,
+        "date": date
+      },
+      UpdateExpression: 'set #s = :trueVal',
+      ExpressionAttributeNames: {'#s' : 'sent'},
+      ExpressionAttributeValues: {
+        ':trueVal': true
+      }
+    }
+    return db.update(params).promise()
+  }
 
   // query (key) {
   //   const params = {
@@ -126,7 +101,7 @@ class DynamoTable {
   //   return db.get(params).promise()
   //     .then(item => Promise.resolve(item.Item))
   // }
-  //
+
   // update (key, payload, action = 'PUT') {
   //   const transformedPayload = {}
   //   payload.last_updated = payload.last_updated || moment().utc().format()

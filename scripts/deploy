@@ -2,8 +2,8 @@
 
 # build
 app_name=citycheckout-api
-aws_region=us-east-2
-s3_bucket=citycheckout-lambda
+aws_region=us-east-1
+s3_bucket=citycheckout-api
 
 sam package --template-file template.yml --s3-bucket $s3_bucket --output-template-file template_packaged.yml --s3-prefix $app_name --region $aws_region
 sam deploy --template-file template_packaged.yml --stack-name $app_name --region $aws_region --capabilities CAPABILITY_IAM

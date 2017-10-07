@@ -5,6 +5,7 @@ module.exports = [{
   handler: (req, res) => {
     const amount = req.body.amount;
     const token = req.body.token;
+
     const gateway = getBrainTreeAuth();
 
     gateway.transaction.sale({
