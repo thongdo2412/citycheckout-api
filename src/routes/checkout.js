@@ -29,8 +29,7 @@ module.exports = [{
     const phone = req.body.phone;
     const product = req.body.product;
     const clickId = req.body.voluumClickID;
-    //TODO: add billing address
-    console.log(region);
+    
     const customer = {
       firstName: firstname,
       lastName: lastname,
