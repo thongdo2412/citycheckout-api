@@ -1,5 +1,5 @@
 const Promise = require('bluebird');
-const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth } = require('../helpers/utils');
+const { responseError, responseSuccess, getBrainTreeAuth } = require('../helpers/utils');
 module.exports = [{
   path: '/api/client-token',
   method: 'get',

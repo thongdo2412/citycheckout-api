@@ -1,6 +1,6 @@
 const Promise = require('bluebird');
 const moment = require('moment');
-const { responseError, responseSuccess, getOrderTable, getPlaid, getBrainTreeAuth } = require('../helpers/utils');
+const { responseError, responseSuccess, getOrderTable, getBrainTreeAuth } = require('../helpers/utils');
 module.exports = [{
   path: '/api/test',
   method: 'get',

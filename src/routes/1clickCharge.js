@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth } = require('../helpers/utils');
+const { responseError, responseSuccess, getBrainTreeAuth } = require('../helpers/utils');
 module.exports = [{
   path: '/api/1clickCharge',
   method: 'post',

@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, getAccountTable, getPlaid, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
+const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
 const moment = require('moment');
 module.exports = [{
   path: '/api/checkout',
@@ -29,7 +29,7 @@ module.exports = [{
     const phone = req.body.phone;
     const product = req.body.product;
     const clickId = req.body.voluumClickID;
-    
+
     const customer = {
       firstName: firstname,
       lastName: lastname,
