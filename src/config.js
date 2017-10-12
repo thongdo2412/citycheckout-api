@@ -14,6 +14,11 @@ module.exports = {
       }
     }
   },
+  shopifyAPI: {
+    username: process.env.SHOPIFYAPI_USER,
+    password: process.env.SHOPIFYAPI_PASSWORD,
+    authorization: process.env.SHOPIFYAPI_AUTH,
+  },
   funnelNShipping: {
       "checkouts": [
           {

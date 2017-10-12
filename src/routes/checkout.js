@@ -50,8 +50,8 @@ module.exports = [{
       "company": company,
       "streetAddress": streetAddress,
       "extendedAddress": extendedAddress,
-      "locality": city,
-      "city": region,
+      "region": region,
+      "city": city,
       "postalCode": postalCode,
       "countryCodeAlpha2": country
     })

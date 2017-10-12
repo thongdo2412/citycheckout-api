@@ -21,13 +21,7 @@ module.exports = [{
     .then(data => {
       payload = data
       const customer = JSON.stringify(data.transaction.customer)
-      console.log(customer)
       const shippingAddress = JSON.stringify(data.transaction.shipping)
-      console.log(shippingAddress)
-      console.log(product)
-      console.log(checkoutID)
-      console.log(clickID)
-      console.log(amount)
       return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product)
     })
     .then(data => responseSuccess(res, payload))

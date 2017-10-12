@@ -1,5 +1,7 @@
 const Promise = require('bluebird');
 const moment = require('moment');
+const httpReq = require('request-promise')
+const config = require('../config')
 const { responseError, responseSuccess, getOrderTable, getBrainTreeAuth } = require('../helpers/utils');
 module.exports = [{
   path: '/api/test',
@@ -52,6 +54,10 @@ module.exports = [{
           "currency": "USD"
         }
       }
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": config.shopifyAPI.authorization
+      }
     // getOrderTable().scan("sentAt","none")
     // .then((data) => {
     //   data.Items.forEach(function(item){
@@ -69,36 +75,42 @@ module.exports = [{
       const customer = JSON.parse(data.Items[0].customer)
       const shippingAddress = JSON.parse(data.Items[0].shipping)
       shopifyPost.order.email = customer.email
-      shopifyPost.order.shipping_address = shippingAddress
+      shopifyPost.order.customer.email = customer.email
+      const shipping = {
+        "first_name": "Test",
+        "last_name": "Test",
+        "address1": shippingAddress.streetAddress,
+        "phone": customer.phone,
+        "city": shippingAddress.city,
+        "province": shippingAddress.region,
+        "country": shippingAddress.countryCodeAlpha2,
+        "zip": shippingAddress.postalCode
+      }
+      shopifyPost.order.shipping_address = shipping
       data.Items.forEach(function(item){
         if (item.sentAt == "none") {
           totalAmount += item.amount
           let product = JSON.parse(item.product)
-          console.log(product.id)
-          console.log(counter)
           shopifyPost.order.line_items[counter].variant_id = product.id
+          // getOrderTable.updateSentField(item.key,item.date)
+          // .then(data => {
+          //   return next()
+          // })
           counter++
         }
       })
-        // const shippingAddress = JSON.parse(data.Items[0].shipping)
-        // console.log(shippingAddress)
-        // let counter = 0
-        // shopifyPost.order.customer.email = customer.email
-        // shopifyPost.order.email = customer.email
-        // // shopifyPost.order.shipping_address = shippingAddress
-        // console.log("done at if")
-        // data.Items.forEach(function(item){
-        //   totalAmount += item.amount
-        //   const product = JSON.parse(item.product)
-        //   shopifyPost.order.line_items[counter].variant_id = product.id
-        //   counter++
-        // })
-        // console.log("done at loop")
       shopifyPost.order.transactions[0].amount = totalAmount
-      console.log("done")
-      return responseSuccess(res,shopifyPost)
+      const options = {
+        method: 'POST',
+        uri: 'https://city-cosmetics.myshopify.com/admin/orders.json',
+        headers: headers,
+        body: shopifyPost,
+        json: true // Automatically stringifies the body to JSON
+      }
+      console.log(shopifyPost)
+      return httpReq(options)
     })
-    // .then(data => responseSuccess(res, data))
+    .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
 
   }
