@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
+const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable} = require('../helpers/utils');
 const moment = require('moment');
 module.exports = [{
   path: '/api/checkout',
@@ -6,64 +6,58 @@ module.exports = [{
   handler: (req, res) => {
     const amount = req.body.amount;
     const nonce = req.body.nonce;
+    const checkoutID = req.body.checkoutID;
     const email = req.body.email;
     const nameOnCard = req.body.nameoncard;
 
-    //shipping address
+    // shipping address
     const firstname = req.body.firstname;
     const lastname = req.body.lastname;
     const company = req.body.company;
     const streetAddress = req.body.streetAddress;
     const extendedAddress = req.body.extendedAddress;
     const city = req.body.city;
+    const region = req.body.region;
     const country = req.body.country;
-
-    if (req.body.usState != null) {
-      const region = req.body.usState
-    }
-    else {
-      const region = req.body.caProvince
-    }
-
     const postalCode = req.body.postalCode;
     const phone = req.body.phone;
-    const product = req.body.product;
-    const clickId = req.body.voluumClickID;
 
-    const customer = {
-      firstName: firstname,
-      lastName: lastname,
-      company: company,
-      phone: phone,
-      email: email
-    };
+    // billing address
+    const billingFirstName = req.body.billingFirstName;
+    const billingLastName = req.body.billingLastName;
+    const billingCompany = req.body.billingCompany;
+    const billingStreetAddress = req.body.billingStreetAddress;
+    const extendedBillingAddress = req.body.extendedBillingAddress;
+    const billingCity = req.body.billingCity;
+    const billingCountry = req.body.billingCountry;
+    const billingRegion = req.body.billingRegion;
+    const BillingPostalCode = req.body.BillingPostalCode;
 
-    const shippingAddress = {
-      firstName: firstname,
-      lastName: lastname,
-      company: company,
-      streetAddress: streetAddress,
-      extendedAddress: extendedAddress,
-      locality: city,
-      region: region,
-      postalCode: postalCode,
-      countryCodeAlpha2: country
-    };
+    const product = JSON.stringify(req.body.product);
+    const clickID = req.body.voluumClickID;
 
-    const billingAddress = {
-      firstName: firstname,
-      lastName: lastname,
-      company: company,
-      streetAddress: streetAddress,
-      extendedAddress: extendedAddress,
-      locality: city,
-      region: region,
-      postalCode: postalCode,
-      countryCodeAlpha2: country
-    };
+    const customer = JSON.stringify({
+      "firstName": firstname,
+      "lastName": lastname,
+      "company": company,
+      "phone": phone,
+      "email": email
+    })
 
+    const shippingAddress = JSON.stringify({
+      "firstName": firstname,
+      "lastName": lastname,
+      "company": company,
+      "streetAddress": streetAddress,
+      "extendedAddress": extendedAddress,
+      "locality": city,
+      "city": region,
+      "postalCode": postalCode,
+      "countryCodeAlpha2": country
+    })
+
+    let payload = {}
     const gateway = getBrainTreeAuth();
-
     gateway.transaction.sale({
         amount: amount,
         paymentMethodNonce: nonce,
@@ -78,15 +72,15 @@ module.exports = [{
           email: email
         },
         billing: {
-          firstName: firstname,
-          lastName: lastname,
-          company: company,
-          streetAddress: streetAddress,
-          extendedAddress: extendedAddress,
-          locality: city,
-          region: region,
-          postalCode: postalCode,
-          countryCodeAlpha2: country
+          firstName: billingFirstName,
+          lastName: billingLastName,
+          company: billingCompany,
+          streetAddress: billingStreetAddress,
+          extendedAddress: extendedBillingAddress,
+          locality: billingCity,
+          region: billingRegion,
+          postalCode: BillingPostalCode,
+          countryCodeAlpha2: billingCountry
         },
         shipping: {
           firstName: firstname,
@@ -105,7 +99,11 @@ module.exports = [{
           addBillingAddressToPaymentMethod: true
         }
     })
-    .then(data  => responseSuccess(res, data))
+    .then(data => {
+      payload = data
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product)
+    })
+    .then(data => responseSuccess(res, payload))
     .catch((err) => {
       const body = { error_message: `Problem in creating transactions. ${err.display_message}` };
       responseError(res, body);

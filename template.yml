@@ -80,7 +80,7 @@ Resources:
       Runtime: nodejs6.10
       CodeUri: .
       Description: Net Worth API Lambda
-      MemorySize: 128
+      MemorySize: 512
       Timeout: 300
       Role: !GetAtt NetWorthLambdaRole.Arn
       Policies: AmazonDynamoDBFullAccess

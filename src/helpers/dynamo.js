@@ -25,7 +25,7 @@ class DynamoTable {
         .then(item => Promise.resolve(item.Item))
   }
 
-  put(key, amount, clickid, mapCustomer, mapBilling, mapShipping, mapProduct) {
+  put(key, amount, clickid, customer, shipping, product) {
     const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params ={
       TableName : this.tableName,
@@ -33,37 +33,35 @@ class DynamoTable {
         "key": key,
         "date": date,
         "click_id": clickid,
-        customer: mapCustomer,
-        billing: mapBilling,
-        shipping: mapShipping,
-        product: mapProduct,
-        amount: amount,
-        sent: false
+        "amount": amount,
+        "customer": customer,
+        "shipping": shipping,
+        "product": product,
+        "sentAt": "none"
       }
     }
+    console.log(params)
     return db.put(params).promise()
-    .then(item => Promise.resolve(item.Item))
   }
 
-  query (key){
-    //TODO: this is not done, finish this method
-    const MS_PER_MINUTE = 60000;
-    const myStartDate = new Date(Date.now() - 45 * MS_PER_MINUTE);
-    console.log(typeof(myStartDate))
+  updateSentField(key, date) {
+    const sentAt = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params = {
-      TableName : this.tableName,
-      "key": key,
-
-      // KeyConditions: {
-      //   'date': {
-      //     ComparisonOperator: 'GE',
-      //     AttributeValueList: myStartDate
-      //   }
-      // }
+      TableName: this.tableName,
+      Key: {
+        "key" : key,
+        "date": date
+      },
+      UpdateExpression: 'set #s = :timestamp',
+      ExpressionAttributeNames: {'#s' : 'sentAt'},
+      ExpressionAttributeValues: {
+        ':timestamp': sentAt
+      }
     }
-    return db.query(params).promise()
+    return db.update(params).promise()
   }
-  scan(field,fieldValue) {
+
+  scan(field, fieldValue) {
     const params = {
       TableName: this.tableName,
       FilterExpression: `${field} = :field`,
@@ -72,20 +70,19 @@ class DynamoTable {
     return db.scan(params).promise()
   }
 
-  updateSentField(key, date) {
+  query(key){
+    //TODO: this is not done, finish this method
     const params = {
-      TableName: this.tableName,
-      Key: {
-        "key" : key,
-        "date": date
+      TableName : this.tableName,
+      KeyConditionExpression: "#pk = :pk",
+      ExpressionAttributeNames:{
+        "#pk": "key"
       },
-      UpdateExpression: 'set #s = :trueVal',
-      ExpressionAttributeNames: {'#s' : 'sent'},
       ExpressionAttributeValues: {
-        ':trueVal': true
+        ":pk": key
       }
     }
-    return db.update(params).promise()
+    return db.query(params).promise()
   }
 
 }
@@ -93,3 +90,49 @@ class DynamoTable {
 module.exports = {
   DynamoTable,
 };
+
+// scan(field,fieldValue) {
+//   const params = {
+//     TableName: this.tableName,
+//     FilterExpression: `${field} = :field`,
+//     ExpressionAttributeValues : {':field' : fieldValue}
+//   }
+//   return db.scan(params).promise()
+// }
+//
+// updateSentField(key, date) {
+//   const sentAt = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
+//   const params = {
+//     TableName: this.tableName,
+//     Key: {
+//       "key" : key,
+//       "date": date
+//     },
+//     UpdateExpression: 'set #s = :timestamp',
+//     ExpressionAttributeNames: {'#s' : 'sentAt'},
+//     ExpressionAttributeValues: {
+//       ':timestamp': sentAt
+//     }
+//   }
+//   return db.update(params).promise()
+// }
+
+
+// query (key){
+//   //TODO: this is not done, finish this method
+//   const MS_PER_MINUTE = 60000;
+//   const myStartDate = new Date(Date.now() - 45 * MS_PER_MINUTE);
+//   console.log(typeof(myStartDate))
+//   const params = {
+//     TableName : this.tableName,
+//     "key": key,
+//
+//     // KeyConditions: {
+//     //   'date': {
+//     //     ComparisonOperator: 'GE',
+//     //     AttributeValueList: myStartDate
+//     //   }
+//     // }
+//   }
+//   return db.query(params).promise()
+// }
