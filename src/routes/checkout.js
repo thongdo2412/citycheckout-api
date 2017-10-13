@@ -34,7 +34,8 @@ module.exports = [{
     const BillingPostalCode = req.body.BillingPostalCode;
 
     const product = req.body.product;
-    const clickID = req.body.voluumClickID;
+    const clickID = req.body.clickID;
+    const chtx = req.body.chtx;
 
     const customer = {
       "firstName": firstname,
@@ -101,7 +102,7 @@ module.exports = [{
     })
     .then(data => {
       payload = data
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product)
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product, chtx)
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {

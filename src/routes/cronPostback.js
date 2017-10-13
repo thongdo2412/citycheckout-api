@@ -2,7 +2,7 @@ const Promise = require('bluebird')
 const config = require('../config')
 const { responseError, responseSuccess, getOrderTable, postToExtAPI } = require('../helpers/utils');
 module.exports = [{
-  path: '/api/postback',
+  path: '/api/cronPB',
   method: 'get',
   handler: (req, res) => {
     // const checkoutID = req.body.checkoutID
@@ -10,9 +10,12 @@ module.exports = [{
     const checkoutID = "VI0VH"
     const chtx = "1"
     let payload = {}
-    let clickID = ""
+    let volURL = ""
+    // let clickID = ""
+    const clickID = "wADBH8FT1N1783U8HIVA5T6C"
     let totalAmount = 0
     const url = "https://city-cosmetics.myshopify.com/admin/orders.json"
+    const volBase = "https://vmhlw.voluumtrk2.com/postback"
     let shopifyPost = {
         "order": {
           "line_items": [],
@@ -43,27 +46,12 @@ module.exports = [{
         "Authorization": config.shopify.authorization
       }
 
-    getOrderTable().query(checkoutID)
+    getOrderTable().scan("sentAt","none")
     .then((data) => {
       payload = data
-      // const customer = JSON.parse(data.Items[0].customer)
-      // const shippingAddress = JSON.parse(data.Items[0].shipping)
-      // shopifyPost.order.email = customer.email
-      // shopifyPost.order.customer.email = customer.email
-      // const shipping = {
-      //   "first_name": "Test",
-      //   "last_name": "Test",
-      //   "address1": shippingAddress.streetAddress,
-      //   "phone": customer.phone,
-      //   "city": shippingAddress.city,
-      //   "province": shippingAddress.region,
-      //   "country": shippingAddress.countryCodeAlpha2,
-      //   "zip": shippingAddress.postalCode
-      // }
-      // shopifyPost.order.shipping_address = shipping
       data.Items.map((item) => {
         if (item.click_id != null) {
-          clickID = item.click_id
+          // clickID = item.click_id
           const customer = {
             "first_name": item.customer.firstName,
             "last_name": item.customer.lastName,
@@ -98,17 +86,10 @@ module.exports = [{
       else {
         shopifyPost.order.tax_lines.push({ "price": totalAmount, "rate": 0, "title": "State tax"})
       }
-
-      // console.log(shopifyPost.order.line_items)
-      // console.log(shopifyPost.order.tax_lines)
-      // console.log(shopifyPost.order.customer)
-      // console.log(shopifyPost.order.shipping_address)
-      // console.log(shopifyPost.order.transactions)
-      // console.log(shopifyPost.order)
-      return postToExtAPI(url, headers, shopifyPost) // need to return promise all for both shopify and voluum
+      volURL = `${volBase}?cid=${clickID}&payout=${totalAmount}`
+      return postToExtAPI(url, headers, shopifyPost)
     })
     .then(data => {
-      let promisess = []
       promises = payload.Items.map((item) => {
         if (item.sentAt == "none") {
           return getOrderTable().updateSentField(item.key,item.date)
@@ -116,8 +97,11 @@ module.exports = [{
       })
       return Promise.all(promises)
     })
+    .then(data => {
+      // to avoid bad request 400 from CORS of Voluum
+      return postToExtAPI(volURL,{},{})
+    })
     .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
-
   }
 }];

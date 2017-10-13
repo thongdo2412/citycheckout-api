@@ -1,6 +1,6 @@
 const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
 module.exports = [{
-  path: '/api/1clickCharge',
+  path: '/api/refund',
   method: 'post',
   handler: (req, res) => {
     const amount = req.body.amount

@@ -32,9 +32,7 @@ module.exports = [{
     //   })
     //   return responseSuccess(res, {"success": true})
     // })
-    payload = {
-       "key": "VI0VH",
-    }
+    getOrderTable().scan("sentAt","none")
     .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
 

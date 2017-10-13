@@ -25,7 +25,7 @@ class DynamoTable {
         .then(item => Promise.resolve(item.Item))
   }
 
-  put(key, amount, clickid, customer, shipping, product) {
+  put(key, amount, clickid, customer, shipping, product, chtx) {
     const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params ={
       TableName : this.tableName,
@@ -37,7 +37,8 @@ class DynamoTable {
         "customer": customer,
         "shipping": shipping,
         "product": product,
-        "sentAt": "none"
+        "chargeTax": chtx,
+        "sentAt": "none",
       }
     }
     return db.put(params).promise()
@@ -69,16 +70,19 @@ class DynamoTable {
     return db.scan(params).promise()
   }
 
-  query(key){
+  queryWFilter(key){
     const params = {
       TableName : this.tableName,
       KeyConditionExpression: "#pk = :pk",
+      FilterExpression: "#sent = :n",
       ExpressionAttributeNames:{
-        "#pk": "key"
+        "#pk": "key",
+        "#sent": "sentAt",
       },
       ExpressionAttributeValues: {
-        ":pk": key
-      }
+        ":pk": key,
+        ":n": "none"
+      },
     }
     return db.query(params).promise()
   }
