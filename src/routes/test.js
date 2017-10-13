@@ -1,115 +1,40 @@
 const Promise = require('bluebird');
 const moment = require('moment');
 const httpReq = require('request-promise')
+const Shopify = require('shopify-api-node')
 const config = require('../config')
-const { responseError, responseSuccess, getOrderTable, getBrainTreeAuth } = require('../helpers/utils');
+const { responseError, responseSuccess, getOrderTable, getBrainTreeAuth,postToExtAPI } = require('../helpers/utils');
 module.exports = [{
   path: '/api/test',
   method: 'get',
   handler: (req, res) => {
-    const checkoutID = "YtsmH"
-    let totalAmount = 0
-    let customer = ""
-    let shopifyPost = {
-        "order": {
-          "line_items": [
-            {
-              "variant_id": 0,
-              "quantity": 1
-            },
-            {
-              "variant_id": 0,
-              "quantity": 1
-            }
-          ],
-          "transactions": [
-            {
-              "kind": "sale",
-              "status": "success",
-              "amount": 0
-            }
-          ],
-          "shipping_lines": [
-              {
-                  "title": "Standard Shipping (3-5 Business Days)",
-                  "price": "4.95",
-                  "code": "CITY_FLAT",
-                  "source": "CITY_flat"
-              }
-          ],
-          "customer": {
-            "first_name": "Test",
-            "last_name": "Test",
-            "email": ""
-          },
-          "shipping_address": {},
-          "tax_lines": [
-            {
-              "price": 0,
-              "rate": 0,
-              "title": "State tax"
-            }
-          ],
-          "email": "",
-          "currency": "USD"
-        }
-      }
-      const headers = {
-        "Content-Type": "application/json",
-        "Authorization": config.shopifyAPI.authorization
-      }
-    // getOrderTable().scan("sentAt","none")
-    // .then((data) => {
-    //   data.Items.forEach(function(item){
-    //     if (item.key == checkoutID) {
-    //       totalAmount += item.amount
-    //       customer = item.customer
+    // const checkoutID = "Hy2e5"
+    // const clickID = ""
+    // const amount = 10
+    // const customer = {
+    //   "firstName": "David",
+    //   "lastName": "Hyra",
+    //   "company": "",
+    //   "email": "blank@example.com",
+    //   "phone": "1234567890"
+    // }
     //
+    // let shipping = {}
+    // let product = {}
+    // // getOrderTable().put(checkoutID, amount, clickID, customer, shipping, product)
+    // getOrderTable().query(checkoutID)
+    // .then(data => {
+    //
+    //   data.Items.forEach((item) => {
+    //     if (item.clickID == null) {
+    //       console.log("this is null")
     //     }
     //   })
-    //   return responseSuccess(res,{"totalAmount": totalAmount})
+    //   return responseSuccess(res, {"success": true})
     // })
-    getOrderTable().query(checkoutID)
-    .then((data) => {
-      let counter = 0
-      const customer = JSON.parse(data.Items[0].customer)
-      const shippingAddress = JSON.parse(data.Items[0].shipping)
-      shopifyPost.order.email = customer.email
-      shopifyPost.order.customer.email = customer.email
-      const shipping = {
-        "first_name": "Test",
-        "last_name": "Test",
-        "address1": shippingAddress.streetAddress,
-        "phone": customer.phone,
-        "city": shippingAddress.city,
-        "province": shippingAddress.region,
-        "country": shippingAddress.countryCodeAlpha2,
-        "zip": shippingAddress.postalCode
-      }
-      shopifyPost.order.shipping_address = shipping
-      data.Items.forEach(function(item){
-        if (item.sentAt == "none") {
-          totalAmount += item.amount
-          let product = JSON.parse(item.product)
-          shopifyPost.order.line_items[counter].variant_id = product.id
-          // getOrderTable.updateSentField(item.key,item.date)
-          // .then(data => {
-          //   return next()
-          // })
-          counter++
-        }
-      })
-      shopifyPost.order.transactions[0].amount = totalAmount
-      const options = {
-        method: 'POST',
-        uri: 'https://city-cosmetics.myshopify.com/admin/orders.json',
-        headers: headers,
-        body: shopifyPost,
-        json: true // Automatically stringifies the body to JSON
-      }
-      console.log(shopifyPost)
-      return httpReq(options)
-    })
+    payload = {
+       "key": "VI0VH",
+    }
     .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
 

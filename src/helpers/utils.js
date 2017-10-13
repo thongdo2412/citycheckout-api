@@ -3,7 +3,7 @@ const KMS = require('aws-sdk/clients/kms');
 const { DynamoTable } = require('../helpers/dynamo');
 const braintree = require('braintree');
 const kms = new KMS();
-
+const httpReq = require('request-promise')
 function decrypt(key) {
   const params = {
     CiphertextBlob: Buffer.from(key, 'base64'),
@@ -73,6 +73,17 @@ function getBrainTreeAuth() {
   });
 }
 
+function postToExtAPI (url,headers,body) {
+  const options = {
+    method: 'POST',
+    uri: url,
+    headers: headers,
+    body: body,
+    json: true // Automatically stringifies the body to JSON
+  }
+  return httpReq(options).promise()
+}
+
 module.exports = {
   getPlaid,
   decrypt,
@@ -81,4 +92,5 @@ module.exports = {
   getAccountTable,
   getBrainTreeAuth,
   getOrderTable,
+  postToExtAPI,
 };

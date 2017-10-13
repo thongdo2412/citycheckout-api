@@ -1,6 +1,6 @@
 const config = require('../config');
 const AWS = config.AWS
-const db = new AWS.DynamoDB.DocumentClient()
+const db = new AWS.DynamoDB.DocumentClient(options = {convertEmptyValues: true})
 const _ = require('lodash');
 const moment = require('moment');
 const Promise = require('bluebird');
@@ -40,7 +40,6 @@ class DynamoTable {
         "sentAt": "none"
       }
     }
-    console.log(params)
     return db.put(params).promise()
   }
 
@@ -71,7 +70,6 @@ class DynamoTable {
   }
 
   query(key){
-    //TODO: this is not done, finish this method
     const params = {
       TableName : this.tableName,
       KeyConditionExpression: "#pk = :pk",

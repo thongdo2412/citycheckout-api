@@ -33,18 +33,18 @@ module.exports = [{
     const billingRegion = req.body.billingRegion;
     const BillingPostalCode = req.body.BillingPostalCode;
 
-    const product = JSON.stringify(req.body.product);
+    const product = req.body.product;
     const clickID = req.body.voluumClickID;
 
-    const customer = JSON.stringify({
+    const customer = {
       "firstName": firstname,
       "lastName": lastname,
       "company": company,
       "phone": phone,
       "email": email
-    })
+    }
 
-    const shippingAddress = JSON.stringify({
+    const shippingAddress = {
       "firstName": firstname,
       "lastName": lastname,
       "company": company,
@@ -53,8 +53,8 @@ module.exports = [{
       "region": region,
       "city": city,
       "postalCode": postalCode,
-      "countryCodeAlpha2": country
-    })
+      "country": country
+    }
 
     let payload = {}
     const gateway = getBrainTreeAuth();

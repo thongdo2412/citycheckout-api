@@ -14,9 +14,10 @@ module.exports = {
       }
     }
   },
-  shopifyAPI: {
-    username: process.env.SHOPIFYAPI_USER,
-    password: process.env.SHOPIFYAPI_PASSWORD,
+  shopify: {
+    name: process.env.SHOPIFY_NAME,
+    apikey: process.env.SHOPIFY_APIKEY,
+    password: process.env.SHOPIFY_PASSWORD,
     authorization: process.env.SHOPIFYAPI_AUTH,
   },
   funnelNShipping: {
