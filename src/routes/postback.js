@@ -71,6 +71,7 @@ module.exports = [{
             "country": shippingAddress.country,
             "zip": shippingAddress.postalCode
           }
+          const chtx = item.chtx
           shopifyPost.order.shipping_address = shipping
         }
         if (item.sentAt == "none") {
@@ -90,6 +91,7 @@ module.exports = [{
       return postToExtAPI(url, headers, shopifyPost)
     })
     .then(data => {
+      let promises = []
       promises = payload.Items.map((item) => {
         if (item.sentAt == "none") {
           return getOrderTable().updateSentField(item.key,item.date)

@@ -1,18 +1,15 @@
 const Promise = require('bluebird')
 const config = require('../config')
+const _ = require('lodash')
 const { responseError, responseSuccess, getOrderTable, postToExtAPI } = require('../helpers/utils');
 module.exports = [{
   path: '/api/cronPB',
   method: 'get',
   handler: (req, res) => {
-    // const checkoutID = req.body.checkoutID
-    // const chtx = req.body.chtx
-    const checkoutID = "VI0VH"
-    const chtx = "1"
+    console.log("starting the cron...")
     let payload = {}
-    let volURL = ""
-    // let clickID = ""
-    const clickID = "wADBH8FT1N1783U8HIVA5T6C"
+    let volURL = []
+    let clickID = ""
     let totalAmount = 0
     const url = "https://city-cosmetics.myshopify.com/admin/orders.json"
     const volBase = "https://vmhlw.voluumtrk2.com/postback"
@@ -49,48 +46,56 @@ module.exports = [{
     getOrderTable().scan("sentAt","none")
     .then((data) => {
       payload = data
-      data.Items.map((item) => {
-        if (item.click_id != null) {
-          // clickID = item.click_id
-          const customer = {
-            "first_name": item.customer.firstName,
-            "last_name": item.customer.lastName,
-            "email": item.customer.email,
-          }
-          const shippingAddress = item.shipping
-          shopifyPost.order.email = customer.email
-          shopifyPost.order.customer = customer
+      items = data.Items
+      let promises = []
+      grouped = _.mapValues(_.groupBy(items, "key"))
+      const keysName = Object.keys(grouped)
+      // TODO: this is stupid 2 nested loop algorithm
+      promises = keysName.map((name) => { // post multiple to Shopify
+        grouped[name].map((item) => { //construct body for Shopify post
+          if (item.key != null) {
+            clickID = item.clickID
+            const customer = {
+              "first_name": item.customer.firstName,
+              "last_name": item.customer.lastName,
+              "email": item.customer.email,
+            }
+            const shippingAddress = item.shipping
+            shopifyPost.order.email = customer.email
+            shopifyPost.order.customer = customer
 
-          const shipping = {
-            "first_name": item.customer.firstName,
-            "last_name": item.customer.lastName,
-            "address1": shippingAddress.streetAddress,
-            "phone": item.customer.phone,
-            "city": shippingAddress.city,
-            "province": shippingAddress.region,
-            "country": shippingAddress.country,
-            "zip": shippingAddress.postalCode
+            const shipping = {
+              "first_name": item.customer.firstName,
+              "last_name": item.customer.lastName,
+              "address1": shippingAddress.streetAddress,
+              "phone": item.customer.phone,
+              "city": shippingAddress.city,
+              "province": shippingAddress.region,
+              "country": shippingAddress.country,
+              "zip": shippingAddress.postalCode
+            }
+            const chtx = item.chtx
+            shopifyPost.order.shipping_address = shipping
           }
-          shopifyPost.order.shipping_address = shipping
-        }
-        if (item.sentAt == "none") {
           totalAmount += item.amount
           shopifyPost.order.line_items.push({"variant_id": item.product.id, "quantity": 1, })
+        })
+        shopifyPost.order.transactions[0].amount = totalAmount
+        if (chtx == "1") {
+          totalTax = parseFloat((totalAmount * .09).toFixed(2))
+          shopifyPost.order.tax_lines.push({ "price": totalTax, "rate": 0.09, "title": "State tax" })
         }
+        else {
+          shopifyPost.order.tax_lines.push({ "price": totalAmount, "rate": 0, "title": "State tax"})
+        }
+        volURL.push(`${volBase}?cid=${clickID}&payout=${totalAmount}`)
+        return postToExtAPI(url, headers, shopifyPost)
       })
-      shopifyPost.order.transactions[0].amount = totalAmount
-      if (chtx == "1") {
-        totalTax = parseFloat((totalAmount * .09).toFixed(2))
-        shopifyPost.order.tax_lines.push({ "price": totalTax, "rate": 0.09, "title": "State tax" })
-      }
-      else {
-        shopifyPost.order.tax_lines.push({ "price": totalAmount, "rate": 0, "title": "State tax"})
-      }
-      volURL = `${volBase}?cid=${clickID}&payout=${totalAmount}`
-      return postToExtAPI(url, headers, shopifyPost)
+      return Promise.all(promises)
     })
     .then(data => {
-      promises = payload.Items.map((item) => {
+      let promises = []
+      promises = payload.Items.map((item) => { //update Order Table
         if (item.sentAt == "none") {
           return getOrderTable().updateSentField(item.key,item.date)
         }
@@ -99,9 +104,14 @@ module.exports = [{
     })
     .then(data => {
       // to avoid bad request 400 from CORS of Voluum
-      return postToExtAPI(volURL,{},{})
+      let promises = []
+      promises = volURL.map((url) => { //post to Voluum
+        return postToExtAPI(volURL,{},{})
+      })
+      return Promise.all(promises)
     })
     .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
+    console.log("Cron ended...")
   }
 }];
