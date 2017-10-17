@@ -9,56 +9,97 @@ module.exports = [{
   path: '/api/test',
   method: 'get',
   handler: (req, res) => {
-    // const url = "https://vmhlw.voluumtrk2.com/postback"
-    // const body = {
-    //   "cid": "w3IDD2JDGT5FEF0913R29C8I",
-    //   "payout": "10"
-    // }
-    //
-    // postToExtAPI(url,{},body,"form")
+    // // const url = "https://vmhlw.voluumtrk2.com/postback"
+    // // const body = {
+    // //   "cid": "w3IDD2JDGT5FEF0913R29C8I",
+    // //   "payout": "10"
+    // // }
+    // //
+    // // postToExtAPI(url,{},body,"form")
+    // // const checkoutID = "Yw6e7D9szt"
+    // let payload = {}
     // const checkoutID = "Yw6e7D9szt"
-    let payload = {}
-    const checkoutID = "Yw6e7D9szt"
-
-    getOrderTable().query(checkoutID)
+    //
+    // getOrderTable().query(checkoutID)
+    // .then((data) => {
+    //   let clickID = ""
+    //   let chtx = ""
+    //   let customerEmail = ""
+    //   let customer = ""
+    //   let shipping = ""
+    //   let totalAmount = 0
+    //   let line_items = []
+    //   let tax_lines = []
+    //   payload = data
+    //   data.Items.map((item) => {
+    //     if (item.hasOwnProperty("click_id")) {
+    //       clickID = item.click_id
+    //       chtx = item.chargeTax
+    //       customer = constructCustomer(item.customer.firstName,item.customer.lastName,item.customer.email)
+    //       customerEmail = customer.email
+    //       shipping = constructShippingAddress(item.customer.firstName,
+    //         item.customer.lastName, item.shipping.streetAddress, item.customer.phone,
+    //       item.shipping.city, item.shipping.region, item.shipping.country, item.shipping.postalCode)
+    //     }
+    //     totalAmount += item.amount
+    //     line_items.push({"variant_id": item.product.id, "quantity": 1, })
+    //   })
+    //   tax_lines.push(calculateTax(chtx,totalAmount))
+    //   shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail)
+    //   return postToThirdParties(shopifyBody,clickID,totalAmount)
+    // })
+    // .then(data => {
+    //   let promises = []
+    //   promises = payload.Items.map((item) => {
+    //     if (typeof item.sent_at === 'undefined') {
+    //       return getOrderTable().updateSentField(item.key,item.date)
+    //     }
+    //   })
+    //   return Promise.all(promises)
+    //   // console.log(payload)
+    // })
+    getOrderTable().scan()
     .then((data) => {
-      let clickID = ""
-      let chtx = ""
-      let customerEmail = ""
-      let customer = ""
-      let shipping = ""
-      let totalAmount = 0
-      let line_items = []
-      let tax_lines = []
       payload = data
-      data.Items.map((item) => {
-        if (item.hasOwnProperty("click_id")) {
-          clickID = item.click_id
-          chtx = item.chargeTax
-          customer = constructCustomer(item.customer.firstName,item.customer.lastName,item.customer.email)
-          customerEmail = customer.email
-          shipping = constructShippingAddress(item.customer.firstName,
-            item.customer.lastName, item.shipping.streetAddress, item.customer.phone,
-          item.shipping.city, item.shipping.region, item.shipping.country, item.shipping.postalCode)
-        }
-        totalAmount += item.amount
-        line_items.push({"variant_id": item.product.id, "quantity": 1, })
-      })
-      tax_lines.push(calculateTax(chtx,totalAmount))
-      shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail)
-      return postToThirdParties(shopifyBody,clickID,totalAmount)
-    })
-    .then(data => {
+      items = data.Items
       let promises = []
-      promises = payload.Items.map((item) => {
-        if (typeof item.sent_at === 'undefined') {
-          return getOrderTable().updateSentField(item.key,item.date)
-        }
+      grouped = _.mapValues(_.groupBy(items, "key"))
+      const keysName = Object.keys(grouped)
+
+      promises = keysName.map((name) => { // post multiple to Shopify
+        let clickID = ""
+        let chtx = ""
+        let shipAmount = 0
+        let customerEmail = ""
+        let customer = {}
+        let shipping = {}
+        let totalAmount = 0
+        let line_items = []
+        let tax_lines = []
+
+        grouped[name].map((item) => { //construct body for Shopify post
+          if (item.hasOwnProperty("click_id")) {
+            clickID = item.click_id
+            chtx = item.charge_tax
+            shipAmount = item.shipping_amount
+            customer = constructCustomer(item.customer.firstName,item.customer.lastName,item.customer.email)
+            customerEmail = customer.email
+            shipping = constructShippingAddress(item.customer.firstName,
+              item.customer.lastName, item.shipping.streetAddress, item.customer.phone,
+            item.shipping.city, item.shipping.region, item.shipping.country, item.shipping.postalCode)
+          }
+          totalAmount += item.amount
+          line_items.push({"variant_id": item.product.id, "quantity": 1, })
+        })
+        tax_lines.push(calculateTax(chtx,totalAmount,shipAmount))
+        shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail)
+        // return postToThirdParties(shopifyBody,clickID,totalAmount)
+        // console.log(shopifyBody)
+        return shopifyBody
       })
-      return Promise.all(promises)
-      // console.log(payload)
+      return responseSuccess(res, promises)
     })
-    .then(data => responseSuccess(res, data))
+    // .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
 
   }

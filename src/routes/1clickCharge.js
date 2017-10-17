@@ -9,6 +9,7 @@ module.exports = [{
     const checkoutID = req.body.checkoutID
     const clickID = req.body.clickID
     const chtx = req.body.chtx
+    const shipAmount = 0
     let payload = {}
 
     const gateway = getBrainTreeAuth();
@@ -23,7 +24,7 @@ module.exports = [{
       payload = data
       const customer = data.transaction.customer
       const shippingAddress = data.transaction.shipping
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product, chtx)
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product, chtx, shipAmount)
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {

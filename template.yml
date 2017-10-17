@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Net Worth API Lambda
+Description: City Checkout API Lambda
 
 Resources:
   NetWorthLambdaRole:
@@ -79,7 +79,7 @@ Resources:
       Handler: index.handler
       Runtime: nodejs6.10
       CodeUri: .
-      Description: Net Worth API Lambda
+      Description: City Checkout API Lambda
       MemorySize: 512
       Timeout: 300
       Role: !GetAtt NetWorthLambdaRole.Arn
@@ -99,10 +99,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: citycheckout-api-cron
-      Handler: index.testTaskHandler
+      Handler: index.postBackTaskHandler
       Runtime: nodejs6.10
       CodeUri: .
-      Description: Print timestamp every 2 minutes
+      Description: Postback in every 45 minutes
       MemorySize: 128
       Timeout: 300
       Role: !GetAtt NetWorthLambdaRole.Arn
@@ -110,7 +110,7 @@ Resources:
         ScheduledTimer:
           Type: Schedule
           Properties:
-            Schedule: rate(2 minutes)
+            Schedule: rate(45 minutes)
 
   OrderTable:
     Type: AWS::DynamoDB::Table

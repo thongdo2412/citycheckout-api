@@ -6,14 +6,15 @@ module.exports = [{
   method: 'post',
   handler: (req, res) => {
     const checkoutID = req.body.checkoutID
-    
+    let payload = {}
     getOrderTable().query(checkoutID)
     .then((data) => {
       let clickID = ""
       let chtx = ""
+      let shipAmount = 0
       let customerEmail = ""
-      let customer = ""
-      let shipping = ""
+      let customer = {}
+      let shipping = {}
       let totalAmount = 0
       let line_items = []
       let tax_lines = []
@@ -21,7 +22,8 @@ module.exports = [{
       data.Items.map((item) => {
         if (item.hasOwnProperty("click_id")) {
           clickID = item.click_id
-          chtx = item.chargeTax
+          chtx = item.charge_tax
+          shipAmount = item.shipping_amount
           customer = constructCustomer(item.customer.firstName,item.customer.lastName,item.customer.email)
           customerEmail = customer.email
           shipping = constructShippingAddress(item.customer.firstName,
@@ -31,7 +33,7 @@ module.exports = [{
         totalAmount += item.amount
         line_items.push({"variant_id": item.product.id, "quantity": 1, })
       })
-      tax_lines.push(calculateTax(chtx,totalAmount))
+      tax_lines.push(calculateTax(chtx,totalAmount,shipAmount))
       shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail)
       return postToThirdParties(shopifyBody,clickID,totalAmount)
     })

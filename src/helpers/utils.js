@@ -96,9 +96,11 @@ function constructShippingAddress(firstName,lastName,streetAddress,phone,city,re
   return shipping
 }
 
-function calculateTax(chtx,totalAmount){
+function calculateTax(chtx,totalAmount,shipAmount){
   if (chtx == "1") {
-    totalTax = parseFloat((totalAmount * .09).toFixed(2))
+    priceWTax = totalAmount - shipAmount
+    priceWOTax = (priceWTax / 1.09).toFixed(2)
+    totalTax = (priceWOTax * 0.09).toFixed(2)
     return  { "price": totalTax, "rate": 0.09, "title": "State tax" }
   }
   else {
