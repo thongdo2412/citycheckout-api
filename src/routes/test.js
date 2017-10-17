@@ -4,55 +4,61 @@ const httpReq = require('request-promise')
 const Shopify = require('shopify-api-node')
 const config = require('../config')
 const _ = require('lodash')
-const { responseError, responseSuccess, getOrderTable, getBrainTreeAuth,postToExtAPI } = require('../helpers/utils');
+const { responseError, responseSuccess, getOrderTable, postToExtAPI,postToVoluum,postToShopify,postToThirdParties,constructShopifyBody,constructCustomer,constructShippingAddress,calculateTax } = require('../helpers/utils');
 module.exports = [{
   path: '/api/test',
   method: 'get',
   handler: (req, res) => {
-    // const checkoutID = "Hy2e5"
-    // const clickID = ""
-    // const amount = 10
-    // const customer = {
-    //   "firstName": "David",
-    //   "lastName": "Hyra",
-    //   "company": "",
-    //   "email": "blank@example.com",
-    //   "phone": "1234567890"
+    // const url = "https://vmhlw.voluumtrk2.com/postback"
+    // const body = {
+    //   "cid": "w3IDD2JDGT5FEF0913R29C8I",
+    //   "payout": "10"
     // }
     //
-    // let shipping = {}
-    // let product = {}
-    // // getOrderTable().put(checkoutID, amount, clickID, customer, shipping, product)
-    // getOrderTable().query(checkoutID)
-    // .then(data => {
-    //
-    //   data.Items.forEach((item) => {
-    //     if (item.clickID == null) {
-    //       console.log("this is null")
-    //     }
-    //   })
-    //   return responseSuccess(res, {"success": true})
-    // })
-    getOrderTable().scan("sentAt","none")
-    .then(data => {
-      items = data.Items
-      grouped= _.mapValues(_.groupBy(items, "key"))
+    // postToExtAPI(url,{},body,"form")
+    // const checkoutID = "Yw6e7D9szt"
+    let payload = {}
+    const checkoutID = "Yw6e7D9szt"
 
-      // var grouped = _.mapValues(_.groupBy(cars, 'make'), clist => clist.map(car => _.omit(car, 'make')));
-      // console.log(grouped[0][0].key)
-      const keysName = Object.keys(grouped)
-      //go thru each key of grouped-by json response
-
-      // TODO: this is stupid 2 nested loop algorithm
-      keysName.map((name) => {
-        grouped[name].map((nameitem) => {
-          console.log(nameitem.key)
-        })
-
+    getOrderTable().query(checkoutID)
+    .then((data) => {
+      let clickID = ""
+      let chtx = ""
+      let customerEmail = ""
+      let customer = ""
+      let shipping = ""
+      let totalAmount = 0
+      let line_items = []
+      let tax_lines = []
+      payload = data
+      data.Items.map((item) => {
+        if (item.hasOwnProperty("click_id")) {
+          clickID = item.click_id
+          chtx = item.chargeTax
+          customer = constructCustomer(item.customer.firstName,item.customer.lastName,item.customer.email)
+          customerEmail = customer.email
+          shipping = constructShippingAddress(item.customer.firstName,
+            item.customer.lastName, item.shipping.streetAddress, item.customer.phone,
+          item.shipping.city, item.shipping.region, item.shipping.country, item.shipping.postalCode)
+        }
+        totalAmount += item.amount
+        line_items.push({"variant_id": item.product.id, "quantity": 1, })
       })
-      return responseSuccess(res, keysName)
+      tax_lines.push(calculateTax(chtx,totalAmount))
+      shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail)
+      return postToThirdParties(shopifyBody,clickID,totalAmount)
     })
-    // .then(data => responseSuccess(res, data))
+    .then(data => {
+      let promises = []
+      promises = payload.Items.map((item) => {
+        if (typeof item.sent_at === 'undefined') {
+          return getOrderTable().updateSentField(item.key,item.date)
+        }
+      })
+      return Promise.all(promises)
+      // console.log(payload)
+    })
+    .then(data => responseSuccess(res, data))
     .catch(err => responseError(res, err))
 
   }

@@ -38,14 +38,13 @@ class DynamoTable {
         "shipping": shipping,
         "product": product,
         "chargeTax": chtx,
-        "sentAt": "none",
       }
     }
     return db.put(params).promise()
   }
 
   updateSentField(key, date) {
-    const sentAt = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
+    const sent_at = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params = {
       TableName: this.tableName,
       Key: {
@@ -53,9 +52,9 @@ class DynamoTable {
         "date": date
       },
       UpdateExpression: 'set #s = :timestamp',
-      ExpressionAttributeNames: {'#s' : 'sentAt'},
+      ExpressionAttributeNames: {'#s' : 'sent_at'},
       ExpressionAttributeValues: {
-        ':timestamp': sentAt
+        ':timestamp': sent_at
       }
     }
     return db.update(params).promise()
@@ -70,18 +69,17 @@ class DynamoTable {
     return db.scan(params).promise()
   }
 
-  queryWFilter(key){
+  query(key){
     const params = {
       TableName : this.tableName,
       KeyConditionExpression: "#pk = :pk",
-      FilterExpression: "#sent = :n",
+      FilterExpression: "attribute_not_exists(#sent)",
       ExpressionAttributeNames:{
         "#pk": "key",
-        "#sent": "sentAt",
+        "#sent": "sent_at"
       },
       ExpressionAttributeValues: {
         ":pk": key,
-        ":n": "none"
       },
     }
     return db.query(params).promise()

@@ -4,48 +4,8 @@ const { DynamoTable } = require('../helpers/dynamo');
 const braintree = require('braintree');
 const kms = new KMS();
 const httpReq = require('request-promise')
-function decrypt(key) {
-  const params = {
-    CiphertextBlob: Buffer.from(key, 'base64'),
-  };
-
-  return new Promise((resolve, reject) => {
-    kms.decrypt(params, (err, data) => {
-      if (err) reject(err);
-      else resolve(data.Plaintext.toString());
-    });
-  });
-}
-
-function getPlaidConfig() {
-  const promises = [
-    decrypt(process.env.PLAID_CLIENT_ID),
-    decrypt(process.env.PLAID_SECRET),
-  ];
-
-  return Promise.all(promises)
-    .then(([PLAID_CLIENT_ID, PLAID_SECRET]) => ({
-      PLAID_CLIENT_ID,
-      PLAID_SECRET,
-      PLAID_PUBLIC_KEY: process.env.PLAID_PUBLIC_KEY,
-      PLAID_ENV: process.env.PLAID_ENV,
-    }));
-}
-
-function getPlaid() {
-  return getPlaidConfig()
-    .then((config) => {
-      const {
-        PLAID_CLIENT_ID,
-        PLAID_SECRET,
-        PLAID_PUBLIC_KEY,
-        PLAID_ENV,
-      } = config;
-
-      return new plaid.Client(PLAID_CLIENT_ID, PLAID_SECRET, PLAID_PUBLIC_KEY,
-        plaid.environments[PLAID_ENV]);
-    });
-}
+const Promise = require('bluebird')
+const config = require('../config')
 
 function responseSuccess(res, body = {}, statusCode = 200) {
   return res.status(statusCode).json(body);
@@ -53,11 +13,6 @@ function responseSuccess(res, body = {}, statusCode = 200) {
 
 function responseError(res, body, statusCode = 400) {
   return responseSuccess(res, body, statusCode);
-}
-
-function getAccountTable(req) {
-  const tableName = process.env.PLAID_ENV === 'sandbox' ? `${process.env.PLAID_ENV}-${process.env.ACCOUNT_TABLE}` : process.env.ACCOUNT_TABLE;
-  return new DynamoTable(tableName, req.userInfo.username);
 }
 
 function getOrderTable() {
@@ -73,24 +28,117 @@ function getBrainTreeAuth() {
   });
 }
 
-function postToExtAPI (url,headers,body) {
-  const options = {
+function postToExtAPI (url,headers,body,contentType) {
+  let options = {
     method: 'POST',
     uri: url,
     headers: headers,
-    body: body,
-    json: true // Automatically stringifies the body to JSON
   }
-  return httpReq(options).promise()
+
+  if (contentType == "json") {
+    options.body = body
+    options.json = true
+  }else if (contentType == "form") {
+    options.form = body
+  }
+  return httpReq(options)
+}
+
+function constructShopifyBody (line_items, amount, customer, shipping, tax_lines, customerEmail) {
+  shopifyBody = {
+        "order": {
+          "line_items": line_items,
+          "transactions": [
+            {
+              "kind": "sale",
+              "status": "success",
+              "amount": amount
+            }
+          ],
+          "shipping_lines": [
+              {
+                  "title": "Standard Shipping (3-5 Business Days)",
+                  "price": "4.95",
+                  "code": "CITY_FLAT",
+                  "source": "CITY_flat"
+              }
+          ],
+          "customer": customer,
+          "shipping_address": shipping,
+          "tax_lines": tax_lines,
+          "email": customerEmail,
+          "currency": "USD"
+        }
+  }
+  return shopifyBody
+}
+
+function constructCustomer(firstName,lastName,email) {
+  customer = {
+    "first_name": firstName,
+    "last_name": lastName,
+    "email": email,
+  }
+  return customer
+}
+
+function constructShippingAddress(firstName,lastName,streetAddress,phone,city,region,country,postalCode) {
+  shipping = {
+    "first_name": firstName,
+    "last_name": lastName,
+    "address1": streetAddress,
+    "phone": phone,
+    "city": city,
+    "province": region,
+    "country": country,
+    "zip": postalCode
+  }
+  return shipping
+}
+
+function calculateTax(chtx,totalAmount){
+  if (chtx == "1") {
+    totalTax = parseFloat((totalAmount * .09).toFixed(2))
+    return  { "price": totalTax, "rate": 0.09, "title": "State tax" }
+  }
+  else {
+    return { "price": 0, "rate": 0, "title": "State tax"}
+  }
+}
+
+function postToThirdParties(shopifyBody,cid,payout) {
+  return Promise.all([postToShopify(shopifyBody), postToVoluum(cid,payout)])
+}
+
+function postToShopify(body) {
+  const shopURL = "https://city-cosmetics.myshopify.com/admin/orders.json"
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Shopify-Access-Token": config.shopify.password
+  }
+  return postToExtAPI(shopURL,headers,body,"json")
+}
+
+function postToVoluum(cid,payout) {
+  const volURL = "https://vmhlw.voluumtrk2.com/postback"
+  body = {
+    "cid": cid,
+    "payout": payout
+  }
+  return postToExtAPI(volURL,{},body,"form")
 }
 
 module.exports = {
-  getPlaid,
-  decrypt,
   responseSuccess,
   responseError,
-  getAccountTable,
   getBrainTreeAuth,
   getOrderTable,
   postToExtAPI,
+  postToThirdParties,
+  postToVoluum,
+  postToShopify,
+  constructShopifyBody,
+  constructShippingAddress,
+  constructCustomer,
+  calculateTax,
 };

@@ -95,6 +95,22 @@ Resources:
         #   Type: Schedule
         #   Properties:
         #     Schedule: rate(5 minutes)
+  CityCheckoutCronFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: citycheckout-api-cron
+      Handler: index.testTaskHandler
+      Runtime: nodejs6.10
+      CodeUri: .
+      Description: Print timestamp every 2 minutes
+      MemorySize: 128
+      Timeout: 300
+      Role: !GetAtt NetWorthLambdaRole.Arn
+      Events:
+        ScheduledTimer:
+          Type: Schedule
+          Properties:
+            Schedule: rate(2 minutes)
 
   OrderTable:
     Type: AWS::DynamoDB::Table

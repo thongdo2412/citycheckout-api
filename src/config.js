@@ -16,9 +16,8 @@ module.exports = {
   },
   shopify: {
     name: process.env.SHOPIFY_NAME,
-    apikey: process.env.SHOPIFY_APIKEY,
+    apikey: process.env.SHOPIFY_API_KEY,
     password: process.env.SHOPIFY_PASSWORD,
-    authorization: process.env.SHOPIFYAPI_AUTH,
   },
   funnelNShipping: {
       "checkouts": [
