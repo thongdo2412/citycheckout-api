@@ -1,6 +1,6 @@
 const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable } = require('../helpers/utils');
 module.exports = [{
-  path: '/api/1clickCharge',
+  path: '/api/aClickCharge',
   method: 'post',
   handler: (req, res) => {
     const amount = req.body.amount
@@ -9,7 +9,7 @@ module.exports = [{
     const checkoutID = req.body.checkoutID
     const clickID = req.body.clickID
     const chtx = req.body.chtx
-    const shipAmount = 0
+    const shipAmount = req.body.shipAmount
     let payload = {}
 
     const gateway = getBrainTreeAuth();

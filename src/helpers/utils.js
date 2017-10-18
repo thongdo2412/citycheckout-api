@@ -44,7 +44,24 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, tax_lines, customerEmail) {
+function constructShopifyBody (line_items, amount, customer, shipping, tax_lines, customerEmail, shipAmount) {
+  let shippinglines = []
+  if (shipAmount > 0) {
+      shippinglines.push({
+          "title": "Standard Shipping (3-5 Business Days)",
+          "price": "4.95",
+          "code": "CITY_FLAT",
+          "source": "CITY_flat"
+      })
+    }
+    else {
+      shippinglines.push({
+        "title": "Free Standard Shipping (3-5 Business Days)",
+        "price": "0.00",
+        "code": "CITY_FLAT",
+        "source": "CITY_flat"
+      })
+    }
   shopifyBody = {
         "order": {
           "line_items": line_items,
@@ -55,18 +72,13 @@ function constructShopifyBody (line_items, amount, customer, shipping, tax_lines
               "amount": amount
             }
           ],
-          "shipping_lines": [
-              {
-                  "title": "Standard Shipping (3-5 Business Days)",
-                  "price": "4.95",
-                  "code": "CITY_FLAT",
-                  "source": "CITY_flat"
-              }
-          ],
+          "shipping_lines": shippinglines,
           "customer": customer,
           "shipping_address": shipping,
           "tax_lines": tax_lines,
           "email": customerEmail,
+          "total_price": amount,
+          "total_tax": tax_lines[0].price,
           "currency": "USD"
         }
   }

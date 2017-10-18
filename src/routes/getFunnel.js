@@ -1,11 +1,10 @@
-const { responseError, responseSuccess, getBrainTreeAuth } = require('../helpers/utils');
-const Promise = require('bluebird');
-const config = require('../config');
+const { responseError, responseSuccess } = require('../helpers/utils');
+const map = require('../resources/funnel_maps/funnel_map');
 module.exports = [{
   path: '/api/getFunnel',
   method: 'get',
   handler: (req, res) => {
-    body = config.funnelNShipping
+    body = map.funnelNShipping
     return responseSuccess(res, body)
   }
 }];

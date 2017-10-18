@@ -42,7 +42,7 @@ class PostBackTask {
           line_items.push({"variant_id": item.product.id, "quantity": 1, })
         })
         tax_lines.push(calculateTax(chtx,totalAmount,shipAmount))
-        shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail)
+        shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail,shipAmount)
         return postToThirdParties(shopifyBody,clickID,totalAmount)
       })
       return Promise.all(keysMap)
@@ -56,6 +56,7 @@ class PostBackTask {
       return Promise.all(dbItems)
     })
     .catch(err => console.log(err))
+    console.log("end scheduled task postback...")
   }
 
   run () {
