@@ -1,10 +1,10 @@
-const { responseError, responseSuccess } = require('../helpers/utils');
-const map = require('../resources/funnel_maps/funnel_map');
+const { responseError, responseSuccess, getFunnelMap } = require('../helpers/utils');
+const map = require('../resources/funnel_maps/funnel_map')
 module.exports = [{
   path: '/api/getFunnel',
   method: 'get',
   handler: (req, res) => {
     body = map.funnelNShipping
-    return responseSuccess(res, body)
+    return responseSuccess(res,body)
   }
 }];
