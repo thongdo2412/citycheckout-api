@@ -1,43 +1,33 @@
 const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable } = require('../helpers/utils')
-const crypto = require('crypto')
-const config = require('../config')
+const Promise = require('bluebird')
+
 module.exports = [{
   path: '/api/refund',
   method: 'post',
   handler: (req, res) => {
-    const SECRET = config.shopify.webhooks_secret
-
-    function verifyShopifyHook(req) {
-      var digest = crypto.createHmac('SHA256', SECRET)
-              .update(new Buffer(req.body, 'utf8'))
-              .digest('base64');
-
-      return digest === req.headers['X-Shopify-Hmac-Sha256'];
+    console.log("starting refund...")
+    if (req.headers['x-kotn-webhook-verified'] != '200'){
+      console.log('invalid signature for uninstall')
+      res.status(204).send()
+      return
+    }else {
+      let trans_id = ""
+      let promises = []
+      const gateway = getBrainTreeAuth()
+      const refund = req.body.refund_line_items
+      promises = refund.map((item) => { // assuming properties attribute used to store BT, name :"BT_trans_id"
+        trans_id = item.line_item.properties[0].value
+        if (trans_id) {
+          console.log("going into refund")
+          console.log(typeof(trans_id))
+          console.log(trans_id)
+          return gateway.transaction.refund(trans_id)
+        }
+      })
+      console.log("going to promise")
+      Promise.all(promises)
+      .then(data => responseSuccess(res,{}))
+      .catch(err => responseError(res, err))
     }
-
-    // function parseRequestBody(req, res) {
-    //   req.body = '';
-    //
-    //   req.on('data', function(chunk) {
-    //       req.body += chunk.toString('utf8');
-    //   });
-    //   req.on('end', function() {
-    //       handleRequest(req, res);
-    //   });
-    // }
-
-    function handleRequest(req, res) {
-      if (verifyShopifyHook(req)) {
-          console.log("handle verified request")
-          res.writeHead(200);
-          res.end('Verified webhook');
-          return responseSuccess(res,{})
-      } else {
-          res.writeHead(401);
-          res.end('Unverified webhook');
-          return responseError(res, err)
-      }
-    }
-
   }
 }];

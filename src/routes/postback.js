@@ -1,6 +1,6 @@
 const Promise = require('bluebird')
 const config = require('../config')
-const { responseError, responseSuccess, getOrderTable, postToExtAPI, postToVoluum, postToShopify, postToThirdParties, constructCustomer, constructShippingAddress, constructShopifyBody, calculateTax } = require('../helpers/utils');
+const { responseError, responseSuccess, getOrderTable, postToThirdParties, constructShopifyBody, calculateTax } = require('../helpers/utils');
 module.exports = [{
   path: '/api/postback',
   method: 'post',
@@ -14,27 +14,27 @@ module.exports = [{
       let shipAmount = 0
       let customerEmail = ""
       let customer = {}
-      let shipping = {}
+      let shipping_address = {}
       let totalAmount = 0
       let line_items = []
       let tax_lines = []
       payload = data
-      data.Items.map((item) => {
+      data.Items.map((item) => { // construct line items for this checkout id
         if (item.hasOwnProperty("click_id")) {
           clickID = item.click_id
           chtx = item.charge_tax
           shipAmount = item.shipping_amount
-          customer = constructCustomer(item.customer.firstName,item.customer.lastName,item.customer.email)
+          customer = item.customer
           customerEmail = customer.email
-          shipping = constructShippingAddress(item.customer.firstName,
-            item.customer.lastName, item.shipping.streetAddress, item.customer.phone,
-          item.shipping.city, item.shipping.region, item.shipping.country, item.shipping.postalCode)
+          shipping_address = item.shipping_address
         }
         totalAmount += item.amount
-        line_items.push({"variant_id": item.product.id, "quantity": 1, })
+        let properties = []
+        properties.push({"name": "BT_trans_id", "value": item.trans_id})
+        line_items.push({"variant_id": item.product.id, "quantity": 1, "properties": properties})
       })
       tax_lines.push(calculateTax(chtx,totalAmount,shipAmount))
-      shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping,tax_lines,customerEmail,shipAmount)
+      shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping_address,tax_lines,customerEmail,shipAmount)
       return postToThirdParties(shopifyBody,clickID,totalAmount)
       // console.log(shopifyBody)
       // return responseSuccess(res, shopifyBody)

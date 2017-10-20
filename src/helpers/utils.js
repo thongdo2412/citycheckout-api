@@ -85,29 +85,6 @@ function constructShopifyBody (line_items, amount, customer, shipping, tax_lines
   return shopifyBody
 }
 
-function constructCustomer(firstName,lastName,email) {
-  customer = {
-    "first_name": firstName,
-    "last_name": lastName,
-    "email": email,
-  }
-  return customer
-}
-
-function constructShippingAddress(firstName,lastName,streetAddress,phone,city,region,country,postalCode) {
-  shipping = {
-    "first_name": firstName,
-    "last_name": lastName,
-    "address1": streetAddress,
-    "phone": phone,
-    "city": city,
-    "province": region,
-    "country": country,
-    "zip": postalCode
-  }
-  return shipping
-}
-
 function calculateTax(chtx,totalAmount,shipAmount){
   if (chtx == "1") {
     priceWTax = totalAmount - shipAmount
@@ -147,12 +124,7 @@ module.exports = {
   responseError,
   getBrainTreeAuth,
   getOrderTable,
-  postToExtAPI,
   postToThirdParties,
-  postToVoluum,
-  postToShopify,
   constructShopifyBody,
-  constructShippingAddress,
-  constructCustomer,
   calculateTax,
 };

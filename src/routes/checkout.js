@@ -1,5 +1,4 @@
 const { responseError, responseSuccess, getBrainTreeAuth, getOrderTable} = require('../helpers/utils');
-const moment = require('moment');
 module.exports = [{
   path: '/api/checkout',
   method: 'post',
@@ -33,33 +32,34 @@ module.exports = [{
     const billingRegion = req.body.billingRegion;
     const BillingPostalCode = req.body.BillingPostalCode;
 
+    //product
     const product = req.body.product;
     const clickID = req.body.clickID;
     const chtx = req.body.chtx;
-    const shipAmount = req.body.shipAmount
+    const ship_amount = req.body.shipAmount;
 
     const customer = {
-      "firstName": firstname,
-      "lastName": lastname,
-      "company": company,
-      "phone": phone,
+      "first_name": firstname,
+      "last_name": lastname,
       "email": email
     }
 
-    const shippingAddress = {
-      "firstName": firstname,
-      "lastName": lastname,
+    const shipping_address = {
+      "first_name": firstname,
+      "last_name": lastname,
       "company": company,
-      "streetAddress": streetAddress,
-      "extendedAddress": extendedAddress,
-      "region": region,
+      "address1": streetAddress,
+      "address2": extendedAddress,
+      "province": region,
       "city": city,
-      "postalCode": postalCode,
+      "phone": phone,
+      "zip": postalCode,
       "country": country
     }
 
     let payload = {}
-    const gateway = getBrainTreeAuth();
+    let trans_id = ""
+    const gateway = getBrainTreeAuth()
     gateway.transaction.sale({
         amount: amount,
         paymentMethodNonce: nonce,
@@ -103,12 +103,14 @@ module.exports = [{
     })
     .then(data => {
       payload = data
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shippingAddress, product, chtx, shipAmount)
+      trans_id = data.transaction.id
+      console.log(trans_id)
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, product, chtx, ship_amount, trans_id)
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {
-      const body = { error_message: `Problem in creating transactions. ${err.display_message}` };
-      responseError(res, body);
+      const body = { error_message: `Problem in creating transactions. ${err.display_message}` }
+      responseError(res, body)
     });
   }
 }];
