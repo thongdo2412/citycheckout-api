@@ -16,6 +16,7 @@ module.exports = [{
       const gateway = getBrainTreeAuth()
       const refund = req.body.refund_line_items
       promises = refund.map((item) => { // assuming properties attribute used to store BT, name :"BT_trans_id"
+      // TODO: add condition to check for transaction.status (settled or settling) vs (submitted_for_settlement)
         trans_id = item.line_item.properties[0].value
         if (trans_id) {
           console.log("going into refund")

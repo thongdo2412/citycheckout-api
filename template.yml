@@ -133,24 +133,24 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-  CustomerTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      KeySchema:
-        -
-          AttributeName: customer_id
-          KeyType: HASH
-        -
-          AttributeName: date
-          KeyType: RANGE
-      AttributeDefinitions:
-        -
-          AttributeName: "customer_id"
-          AttributeType: "S"
-        -
-          AttributeName: "date"
-          AttributeType: "S"
-
-      ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+  # CustomerTable:
+  #   Type: AWS::DynamoDB::Table
+  #   Properties:
+  #     KeySchema:
+  #       -
+  #         AttributeName: customer_id
+  #         KeyType: HASH
+  #       -
+  #         AttributeName: date
+  #         KeyType: RANGE
+  #     AttributeDefinitions:
+  #       -
+  #         AttributeName: "customer_id"
+  #         AttributeType: "S"
+  #       -
+  #         AttributeName: "date"
+  #         AttributeType: "S"
+  #
+  #     ProvisionedThroughput:
+  #       ReadCapacityUnits: 1
+  #       WriteCapacityUnits: 1
