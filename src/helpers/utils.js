@@ -86,11 +86,11 @@ function constructShopifyBody (line_items, amount, customer, shipping, tax_lines
 }
 
 function calculateTax(chtx,totalAmount,shipAmount){
-  if (chtx == "1") {
+  if (chtx > 0 ) {
     priceWTax = totalAmount - shipAmount
-    priceWOTax = (priceWTax / 1.09).toFixed(2)
-    totalTax = (priceWOTax * 0.09).toFixed(2)
-    return  { "price": totalTax, "rate": 0.09, "title": "State tax" }
+    priceWOTax = (priceWTax / (1 + chtx)).toFixed(2)
+    totalTax = (priceWOTax * chtx).toFixed(2)
+    return  { "price": totalTax, "rate": chtx, "title": "State tax" }
   }
   else {
     return { "price": 0, "rate": 0, "title": "State tax"}

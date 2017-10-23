@@ -26,7 +26,8 @@ module.exports = {
                       "price": "75.00",
                       "sku": "CITYADVCLR-FULL-3x",
                     },
-                    "nextpage": "cbld001rdcjv"
+                    "nextpage": "cblu003cngthx",
+                    "nopage": "cbld001rdcjv"
                   },
                   {
                     "pagename": "cbld001rdcjv",
@@ -38,7 +39,8 @@ module.exports = {
                       "price": "25.00",
                       "sku": "CITYADVCLR-FULL-1x",
                     },
-                    "nextpage": "cblu003cngthx"
+                    "nextpage": "cblu003cngthx",
+                    "nopage": "cblu003cngthx"
                   },
                   {
                     "pagename": "cblu003cngthx",
@@ -50,7 +52,8 @@ module.exports = {
                       "price": "60.00",
                       "sku": "CITYADVNY-TK-HO-FULL",
                     },
-                    "nextpage": "orderconfirmation"
+                    "nextpage": "orderconfirmation",
+                    "nopage": "orderconfirmation"
                   },
                 ],
               },
@@ -81,7 +84,8 @@ module.exports = {
                       "price": "100.00",
                       "sku": "CITYADVCLR-FULL-4x",
                     },
-                    "nextpage": "cblu003cngthx"
+                    "nextpage": "cblu003wgbyo",
+                    "nopage": "cbld002rtrtt"
                   },
                   {
                     "pagename": "cbld002rtrtt",
@@ -93,7 +97,8 @@ module.exports = {
                       "price": "50.00",
                       "sku": "CITYADVCLR-FULL-2x",
                     },
-                    "nextpage": "cblu003wgbyo"
+                    "nextpage": "cblu003wgbyo",
+                    "nopage": "cblu003wgbyo"
                   },
                   {
                     "pagename": "cblu003wgbyo",
@@ -105,7 +110,8 @@ module.exports = {
                       "price": "60.00",
                       "sku": "CITYADVNY-TK-HO-FULL",
                     },
-                    "nextpage": "orderconfirmation"
+                    "nextpage": "orderconfirmation",
+                    "nopage": "orderconfirmation"
                   },
                 ],
 
@@ -137,7 +143,8 @@ module.exports = {
                       "price": "150.00",
                       "sku": "CITYADVCLR-FULL-6x",
                     },
-                    "nextpage": "cbld003xzavi"
+                    "nextpage": "cblu006hxsmb",
+                    "nopage": "cbld003xzavi"
                   },
                   {
                     "pagename": "cbld003xzavi",
@@ -149,7 +156,8 @@ module.exports = {
                       "price": "75.00",
                       "sku": "CITYADVCLR-FULL-3x",
                     },
-                    "nextpage": "cblu006hxsmb"
+                    "nextpage": "cblu006hxsmb",
+                    "nopage": "cblu006hxsmb"
                   },
                   {
                     "pagename": "cblu006hxsmb",
@@ -161,7 +169,8 @@ module.exports = {
                       "price": "120.00",
                       "sku": "CITYADVTK-TT-HO-NY-OR-SG-FULL",
                     },
-                    "nextpage": "orderconfirmation"
+                    "nextpage": "orderconfirmation",
+                    "nopage": "orderconfirmation"
                   },
                 ],
               },

@@ -22,7 +22,7 @@ module.exports = [{
       data.Items.map((item) => { // construct line items for this checkout id
         if (item.hasOwnProperty("click_id")) {
           clickID = item.click_id
-          chtx = item.charge_tax
+          chtx = item.tax_rate
           shipAmount = item.shipping_amount
           customer = item.customer
           customerEmail = customer.email

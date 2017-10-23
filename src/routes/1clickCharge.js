@@ -8,7 +8,7 @@ module.exports = [{
     const product = req.body.product
     const checkoutID = req.body.checkoutID
     const clickID = req.body.clickID
-    const chtx = req.body.chtx
+    const chtx = req.body.tax_rate
     const shipAmount = req.body.shipAmount
     let payload = {}
 

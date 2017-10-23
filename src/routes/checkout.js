@@ -35,7 +35,7 @@ module.exports = [{
     //product
     const product = req.body.product;
     const clickID = req.body.clickID;
-    const chtx = req.body.chtx;
+    const tax_rate = req.body.tax_rate;
     const ship_amount = req.body.shipAmount;
 
     const customer = {
@@ -105,7 +105,7 @@ module.exports = [{
       payload = data
       trans_id = data.transaction.id
       console.log(trans_id)
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, product, chtx, ship_amount, trans_id)
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, product, tax_rate, ship_amount, trans_id)
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {
