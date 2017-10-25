@@ -24,8 +24,9 @@ module.exports = [{
       payload = data
       const customer = data.transaction.customer
       const shipping_address = data.transaction.shipping
+      const billing_address = data.transaction.billing
       const trans_id = data.transaction.id
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, product, chtx, shipAmount, trans_id)
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, billing_address, product, chtx, shipAmount, trans_id)
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {

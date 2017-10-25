@@ -1,9 +1,9 @@
-const config = require('../config');
+const config = require('../config')
 const AWS = config.AWS
 const db = new AWS.DynamoDB.DocumentClient(options = {convertEmptyValues: true})
-const _ = require('lodash');
-const moment = require('moment');
-const Promise = require('bluebird');
+const _ = require('lodash')
+const moment = require('moment')
+const Promise = require('bluebird')
 
 class DynamoTable {
   constructor() {
@@ -25,7 +25,7 @@ class DynamoTable {
         .then(item => Promise.resolve(item.Item))
   }
 
-  put(key, amount, clickid, customer, shipping_address, product, tax_rate, ship_amount, transid) {
+  put(key, amount, clickid, customer, shipping_address, billing_address, product, tax_rate, ship_amount, transid) {
     const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params ={
       TableName : this.tableName,
@@ -36,6 +36,7 @@ class DynamoTable {
         "amount": amount,
         "customer": customer,
         "shipping_address": shipping_address,
+        "billing_address": billing_address,
         "product": product,
         "tax_rate": tax_rate,
         "shipping_amount": ship_amount,
@@ -63,11 +64,17 @@ class DynamoTable {
   }
 
   scan() {
+    const myStartDate = moment(new Date(Date.now() - (45 * 60000))).format('YYYY-MM-DDTHH:mm:ss:SSS');
+    console.log(myStartDate)
     const params = {
       TableName: this.tableName,
-      FilterExpression: "attribute_not_exists(#sent)",
-      ExpressionAttributeNames:{
-        "#sent": "sent_at"
+      FilterExpression: "attribute_not_exists(#sent) and #rk < :time",
+      ExpressionAttributeNames: {
+        "#sent": "sent_at",
+        "#rk": "date",
+      },
+      ExpressionAttributeValues: {
+        ":time": myStartDate
       },
     }
     return db.scan(params).promise()

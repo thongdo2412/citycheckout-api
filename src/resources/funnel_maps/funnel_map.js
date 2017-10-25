@@ -17,7 +17,7 @@ module.exports = {
                 "name": "Funnel_001",
                 "offers": [
                   {
-                    "pagename": "cblu003cpbck",
+                    "pagename": "cbloto3us",
                     "title": "City Lips - 3 Tubes, Add-On Only Offer",
                     "product":
                     {
@@ -26,11 +26,11 @@ module.exports = {
                       "price": "75.00",
                       "sku": "CITYADVCLR-FULL-3x",
                     },
-                    "nextpage": "cblu003cngthx",
-                    "nopage": "cbld001rdcjv"
+                    "nextpage": "cbloto3ucl",
+                    "nopage": "cbloto1ds"
                   },
                   {
-                    "pagename": "cbld001rdcjv",
+                    "pagename": "cbloto1ds",
                     "title": "City Lips - 1 Tube, Add-On Only Offer",
                     "product":
                     {
@@ -39,11 +39,11 @@ module.exports = {
                       "price": "25.00",
                       "sku": "CITYADVCLR-FULL-1x",
                     },
-                    "nextpage": "cblu003cngthx",
-                    "nopage": "cblu003cngthx"
+                    "nextpage": "cbloto3ucl",
+                    "nopage": "cbloto3ucl"
                   },
                   {
-                    "pagename": "cblu003cngthx",
+                    "pagename": "cbloto3ucl",
                     "title": "City Lips - 3-Color Combo, Add-On Only Offer - 50% Off",
                     "product":
                     {
@@ -75,7 +75,7 @@ module.exports = {
                 "name": "Funnel_002",
                 "offers": [
                   {
-                    "pagename": "cblu004eqnnp",
+                    "pagename": "cbloto4us",
                     "title": "City Lips - 4 Tubes, Add-On Only Offer",
                     "product":
                     {
@@ -84,11 +84,11 @@ module.exports = {
                       "price": "100.00",
                       "sku": "CITYADVCLR-FULL-4x",
                     },
-                    "nextpage": "cblu003wgbyo",
-                    "nopage": "cbld002rtrtt"
+                    "nextpage": "cbloto3ucl",
+                    "nopage": "cbloto2ds"
                   },
                   {
-                    "pagename": "cbld002rtrtt",
+                    "pagename": "cbloto2ds",
                     "title": "City Lips - 2 Tubes, Add-On Only Offer",
                     "product":
                     {
@@ -97,11 +97,11 @@ module.exports = {
                       "price": "50.00",
                       "sku": "CITYADVCLR-FULL-2x",
                     },
-                    "nextpage": "cblu003wgbyo",
-                    "nopage": "cblu003wgbyo"
+                    "nextpage": "cbloto3ucl",
+                    "nopage": "cbloto3ucl"
                   },
                   {
-                    "pagename": "cblu003wgbyo",
+                    "pagename": "cbloto3ucl",
                     "title": "City Lips - 3-Color Combo, Add-On Only Offer - 50% Off",
                     "product":
                     {
@@ -134,7 +134,7 @@ module.exports = {
                 "name": "Funnel_003",
                 "offers": [
                   {
-                    "pagename": "cblu006fcdbp",
+                    "pagename": "cbloto6us",
                     "title": "City Lips - 6 Tubes, Add-On Only Offer",
                     "product":
                     {
@@ -143,11 +143,11 @@ module.exports = {
                       "price": "150.00",
                       "sku": "CITYADVCLR-FULL-6x",
                     },
-                    "nextpage": "cblu006hxsmb",
-                    "nopage": "cbld003xzavi"
+                    "nextpage": "cbloto6ucl",
+                    "nopage": "cbloto3ds"
                   },
                   {
-                    "pagename": "cbld003xzavi",
+                    "pagename": "cbloto3ds",
                     "title": "City Lips - 3 Tubes, Add-On Only Offer",
                     "product":
                     {
@@ -156,11 +156,11 @@ module.exports = {
                       "price": "75.00",
                       "sku": "CITYADVCLR-FULL-3x",
                     },
-                    "nextpage": "cblu006hxsmb",
-                    "nopage": "cblu006hxsmb"
+                    "nextpage": "cbloto6ucl",
+                    "nopage": "cbloto6ucl"
                   },
                   {
-                    "pagename": "cblu006hxsmb",
+                    "pagename": "cbloto6ucl",
                     "title": "City Lips - 6-Color Combo, Add-On Only Offer - 50% Off",
                     "product":
                     {
@@ -177,7 +177,7 @@ module.exports = {
             ]
         },
     ],
-    shipRate: {
+    "shipRate": {
       "Canada": "9.95",
       "International": "19.95",
       "US": [

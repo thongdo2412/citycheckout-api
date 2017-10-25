@@ -44,12 +44,12 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, tax_lines, customerEmail, shipAmount) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tax_lines, customerEmail, shipAmount) {
   let shippinglines = []
   if (shipAmount > 0) {
       shippinglines.push({
           "title": "Standard Shipping (3-5 Business Days)",
-          "price": "4.95",
+          "price": shipAmount,
           "code": "CITY_FLAT",
           "source": "CITY_flat"
       })
@@ -75,6 +75,7 @@ function constructShopifyBody (line_items, amount, customer, shipping, tax_lines
           "shipping_lines": shippinglines,
           "customer": customer,
           "shipping_address": shipping,
+          "billing_address": billing,
           "tax_lines": tax_lines,
           "email": customerEmail,
           "total_price": amount,
@@ -85,12 +86,12 @@ function constructShopifyBody (line_items, amount, customer, shipping, tax_lines
   return shopifyBody
 }
 
-function calculateTax(chtx,totalAmount,shipAmount){
-  if (chtx > 0 ) {
+function calculateTax(tax_rate,totalAmount,shipAmount){
+  if (tax_rate > 0 ) {
     priceWTax = totalAmount - shipAmount
-    priceWOTax = (priceWTax / (1 + chtx)).toFixed(2)
-    totalTax = (priceWOTax * chtx).toFixed(2)
-    return  { "price": totalTax, "rate": chtx, "title": "State tax" }
+    priceWOTax = (priceWTax / (1 + tax_rate)).toFixed(2)
+    totalTax = (priceWOTax * tax_rate).toFixed(2)
+    return  { "price": totalTax, "rate": tax_rate, "title": "State tax" }
   }
   else {
     return { "price": 0, "rate": 0, "title": "State tax"}
@@ -127,4 +128,5 @@ module.exports = {
   postToThirdParties,
   constructShopifyBody,
   calculateTax,
+  postToShopify,
 };

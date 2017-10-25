@@ -102,7 +102,7 @@ Resources:
       Handler: index.postBackTaskHandler
       Runtime: nodejs6.10
       CodeUri: .
-      Description: Postback in every 45 minutes
+      Description: Postback in every 15 minutes for orders created about 45 minutes ago
       MemorySize: 128
       Timeout: 300
       Role: !GetAtt NetWorthLambdaRole.Arn
@@ -110,7 +110,7 @@ Resources:
         ScheduledTimer:
           Type: Schedule
           Properties:
-            Schedule: rate(45 minutes)
+            Schedule: rate(15 minutes)
 
   OrderTable:
     Type: AWS::DynamoDB::Table

@@ -56,6 +56,18 @@ module.exports = [{
       "zip": postalCode,
       "country": country
     }
+    billing_address = {
+      "first_name": billingFirstName,
+      "last_name": billingLastName,
+      "company": billingCompany,
+      "address1": billingStreetAddress,
+      "address2": extendedBillingAddress,
+      "province": billingRegion,
+      "city": billingCity,
+      "phone": phone,
+      "zip": BillingPostalCode,
+      "country": billingCountry
+    }
 
     let payload = {}
     let trans_id = ""
@@ -105,7 +117,7 @@ module.exports = [{
       payload = data
       trans_id = data.transaction.id
       console.log(trans_id)
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, product, tax_rate, ship_amount, trans_id)
+      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, billing_address, product, tax_rate, ship_amount, trans_id)
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {

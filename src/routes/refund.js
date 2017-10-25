@@ -19,15 +19,11 @@ module.exports = [{
       // TODO: add condition to check for transaction.status (settled or settling) vs (submitted_for_settlement)
         trans_id = item.line_item.properties[0].value
         if (trans_id) {
-          console.log("going into refund")
-          console.log(typeof(trans_id))
-          console.log(trans_id)
           return gateway.transaction.refund(trans_id)
         }
       })
-      console.log("going to promise")
       Promise.all(promises)
-      .then(data => responseSuccess(res,{}))
+      .then(data => responseSuccess(res, {}))
       .catch(err => responseError(res, err))
     }
   }
