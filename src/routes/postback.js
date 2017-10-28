@@ -10,7 +10,6 @@ module.exports = [{
     getOrderTable().query(checkoutID)
     .then((data) => {
       let clickID = ""
-      let product_price = 0.0
       let tax_rate = 0.0
       let customerEmail = ""
       let customer = {}
@@ -26,7 +25,6 @@ module.exports = [{
         if (item.click_id) {
           clickID = item.click_id
           tax_rate = item.tax_rate
-          product_price = parseFloat(item.product.price)
           shipAmount = item.shipping_amount
           customer = item.customer
           customerEmail = customer.email

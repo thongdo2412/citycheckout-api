@@ -49,7 +49,7 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
   if (shipAmount > 0) {
       shippinglines.push({
           "title": "Standard Shipping (3-5 Business Days)",
-          "price": shipAmount,
+          "price": `${shipAmount}`,
           "code": "CITY_FLAT",
           "source": "CITY_flat"
       })

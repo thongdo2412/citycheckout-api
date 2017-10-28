@@ -69,6 +69,8 @@ module.exports = [{
       "country": billingCountry
     }
 
+    console.log("going to checkout endpoint")
+    console.log(shipping_address)
     let payload = {}
     let trans_id = ""
     const gateway = getBrainTreeAuth()
@@ -114,10 +116,14 @@ module.exports = [{
         }
     })
     .then(data => {
-      payload = data
-      trans_id = data.transaction.id
-      console.log(trans_id)
-      return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, billing_address, product, tax_rate, ship_amount, trans_id)
+      if (data.transaction.status == "failed" || data.transaction.status == "processor_declined" || data.transaction.status == "gateway_rejected") {
+        return responseError(res, {"reason": "gateway connection error!"})
+      }
+      else {
+        payload = data
+        trans_id = data.transaction.id
+        return getOrderTable().put(checkoutID, amount, clickID, customer, shipping_address, billing_address, product, tax_rate, ship_amount, trans_id)
+      }
     })
     .then(data => responseSuccess(res, payload))
     .catch((err) => {
