@@ -1,6 +1,6 @@
 module.exports = {
   funnelNShipping: {
-    "checkouts": [
+    "lipcheckouts": [
         {
             "id": "cc001",
             "pagename": "cbl001wwylt",
