@@ -1,4 +1,3 @@
-const plaid = require('plaid');
 const KMS = require('aws-sdk/clients/kms');
 const { DynamoTable } = require('../helpers/dynamo');
 const braintree = require('braintree');
@@ -6,6 +5,7 @@ const kms = new KMS();
 const httpReq = require('request-promise')
 const Promise = require('bluebird')
 const config = require('../config')
+const cryptoJS = require('crypto-js')
 
 function responseSuccess(res, body = {}, statusCode = 200) {
   return res.status(statusCode).json(body);
@@ -119,6 +119,23 @@ function postToVoluum(cid,payout) {
   }
   return postToExtAPI(volURL,{},body,"form")
 }
+function sign (params) {
+  return signData(buildDataToSign(params), config.Cybersource.SECRET_KEY)
+}
+
+function buildDataToSign(params) {
+  let dataToSign = []
+  const signedFieldNames = params.signed_field_names.split(',')
+  signedFieldNames.map(item => {
+      dataToSign.push(`${item}=${params[item]}`)
+  })
+  return dataToSign.join()
+}
+
+function signData(data,secret_key) {
+  const hash = cryptoJS.HmacSHA256(data, secret_key)
+  return cryptoJS.enc.Base64.stringify(hash)  
+}
 
 module.exports = {
   responseSuccess,
@@ -129,4 +146,6 @@ module.exports = {
   constructShopifyBody,
   calculateTax,
   postToShopify,
+  postToExtAPI,
+  sign,
 };

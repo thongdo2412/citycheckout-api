@@ -20,4 +20,7 @@ module.exports = {
     password: process.env.SHOPIFY_PASSWORD,
     webhooks_secret: process.env.SHOPIFY_WH_SECRET
   },
+  Cybersource: {
+    SECRET_KEY: process.env.CS_SECRET
+  }
 }

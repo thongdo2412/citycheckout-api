@@ -1,11 +1,11 @@
 {
-  "name": "networth-api",
+  "name": "citycheckout-api",
   "version": "0.0.1",
-  "description": "Net Worth API",
+  "description": "City Checkout API",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nnetworth/networth-api.git"
+    "url": "https://github.com/thongdo2412/citycheckout-api"
   },
   "scripts": {
     "watch": "./scripts/start",
@@ -20,7 +20,9 @@
     "aws-serverless-express": "^3.0.2",
     "body-parser": "^1.18.2",
     "bluebird": "^3.5.0",
+    "braintree":"^2.4.0",
     "cors": "^2.8.4",
+    "crypto-js": "^3.1.9-1",
     "dynamodb-data-types": "^3.0.0",
     "express": "^4.15.4",
     "jsonwebtoken": "^8.0.1",
@@ -28,7 +30,6 @@
     "moment": "^2.18.1",
     "plaid": "^2.0.5",
     "winston": "^2.3.1",
-    "braintree": "^2.3.0",
     "request-promise": "^4.2.2",
     "standard": "^10.0.3",
     "dotenv": "^4.0.0"
