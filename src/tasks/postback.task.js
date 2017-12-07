@@ -2,7 +2,7 @@ require('dotenv').config()
 const _ = require('lodash')
 const Promise = require('bluebird')
 const moment = require('moment')
-const { getOrderTable,postToThirdParties,constructShopifyBody,calculateTax } = require('../helpers/utils');
+const { getOrderTable,postToThirdParties,constructShopifyBody } = require('../helpers/utils');
 class PostBackTask {
   constructor () {
   }
@@ -17,24 +17,25 @@ class PostBackTask {
       const keysName = Object.keys(grouped)
 
       const keysMap = keysName.map((name) => { // post multiple to Shopify
-        let clickID = ""
+        let click_id = ""
         let product_price = 0.0
         let tax_rate = 0.0
         let customerEmail = ""
         let customer = {}
         let shipping_address = {}
         let billing_address = {}
-        let totalAmount = 0.0
-        let shipAmount = 0.0
+        let total_amount = 0.0
+        let ship_amount = 0.0
+        let total_tax_amount = 0.0
         let line_items = []
         let tax_lines = []
         let shopifyBody = {}
         grouped[name].map((item) => { //construct body for Shopify post
           if (item.click_id) {
-            clickID = item.click_id
+            click_id = item.click_id
             tax_rate = item.tax_rate
             product_price = parseFloat(item.product.price)
-            shipAmount = item.shipping_amount
+            ship_amount = item.shipping_amount
             customer = item.customer
             customerEmail = customer.email
             shipping_address = item.shipping_address
@@ -47,13 +48,14 @@ class PostBackTask {
             }
           }
           let properties = []
-          properties.push({"name": "BT_trans_id", "value": item.trans_id})
-          line_items.push({"variant_id": item.product.id, "quantity": 1, "properties": properties})
-          totalAmount += parseFloat(item.amount)
+          properties.push({"name": "CS_trans_id", "value": item.trans_id})
+          line_items.push({"variant_id": item.product.variant_id, "quantity": 1, "properties": properties})
+          total_amount += parseFloat(item.amount)
+          total_tax_amount += parseFloat(item.tax_amount)
         })
-        tax_lines.push(calculateTax(tax_rate,totalAmount,shipAmount))
-        shopifyBody = constructShopifyBody(line_items,totalAmount,customer,shipping_address,billing_address,tax_lines,customerEmail,shipAmount)
-        return postToThirdParties(shopifyBody,clickID,totalAmount)
+        tax_lines.push({"price": total_tax_amount, "rate": tax_rate, "title": "State tax"})
+        shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tax_lines,customerEmail,ship_amount)
+        return postToThirdParties(shopifyBody,click_id,total_amount)
       })
       return Promise.all(keysMap)
     })

@@ -44,12 +44,12 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tax_lines, customerEmail, shipAmount) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tax_lines, customerEmail, ship_amount) {
   let shippinglines = []
-  if (shipAmount > 0) {
+  if (ship_amount > 0) {
       shippinglines.push({
           "title": "Standard Shipping (3-5 Business Days)",
-          "price": `${shipAmount}`,
+          "price": `${ship_amount}`,
           "code": "CITY_FLAT",
           "source": "CITY_flat"
       })
@@ -84,18 +84,6 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
         }
   }
   return shopifyBody
-}
-
-function calculateTax(tax_rate,totalAmount,shipAmount){
-  if (tax_rate > 0 ) {
-    priceWTax = totalAmount - shipAmount
-    priceWOTax = (priceWTax / (1 + tax_rate)).toFixed(2)
-    totalTax = (priceWOTax * tax_rate).toFixed(2)
-    return  { "price": totalTax, "rate": tax_rate, "title": "State tax" }
-  }
-  else {
-    return { "price": 0, "rate": 0, "title": "State tax"}
-  }
 }
 
 function postToThirdParties(shopifyBody,cid,payout) {
@@ -143,9 +131,8 @@ module.exports = {
   getBrainTreeAuth,
   getOrderTable,
   postToThirdParties,
-  constructShopifyBody,
-  calculateTax,
   postToShopify,
   postToExtAPI,
+  constructShopifyBody,
   sign,
 };
