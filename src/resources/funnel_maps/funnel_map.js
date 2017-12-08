@@ -1,181 +1,94 @@
 module.exports = {
   funnelNShipping: {
-    "lipcheckouts": [
+    "checkouts": [
         {
-            "id": "cc001",
-            "pagename": "cbl001wwylt",
-            "title": "City Lips - 1 Tube",
-            "product": {
-              "id": 44739029702,
-              "product_id": 10802505670,
-              "price": "35.00",
-              "sku": "CITYADVCLR-FULL-1x",
-            },
-            "funnels": [
-              {
-                "id": "",
-                "name": "Funnel_001",
-                "offers": [
-                  {
-                    "pagename": "cbloto3us",
-                    "title": "City Lips - 3 Tubes, Add-On Only Offer",
-                    "product":
-                    {
-                      "id": 47992534662,
-                      "product_id": 11515426694,
-                      "price": "75.00",
-                      "sku": "CITYADVCLR-FULL-3x",
-                    },
-                    "nextpage": "cbloto3ucl",
-                    "nopage": "cbloto1ds"
-                  },
-                  {
-                    "pagename": "cbloto1ds",
-                    "title": "City Lips - 1 Tube, Add-On Only Offer",
-                    "product":
-                    {
-                      "id": 47992883142,
-                      "product_id": 11515440454,
-                      "price": "25.00",
-                      "sku": "CITYADVCLR-FULL-1x",
-                    },
-                    "nextpage": "cbloto3ucl",
-                    "nopage": "cbloto3ucl"
-                  },
-                  {
-                    "pagename": "cbloto3ucl",
-                    "title": "City Lips - 3-Color Combo, Add-On Only Offer - 50% Off",
-                    "product":
-                    {
-                      "id": 48547932358,
-                      "product_id": 11553656070,
-                      "price": "60.00",
-                      "sku": "CITYADVNY-TK-HO-FULL",
-                    },
-                    "nextpage": "orderconfirmation",
-                    "nopage": "orderconfirmation"
-                  },
-                ],
-              },
-            ]
+          "id": "cbl001",
+          "pagename": "cbl001",
+          "title": "City Lips - 1 Tube",
+          "product_id": 454957826054,
+          "price": "35.00",
+          "US_funnel": "ccf001"
         },
         {
-            "id": "cc002",
-            "pagename": "cbl002nxbby",
-            "title": "City Lips - 2 Tubes",
-            "product": {
-              "id": 44739121734,
-              "product_id": 10802509958,
-              "price": "66.00",
-              "sku": "CITYADVCLR-FULL-2x",
-            },
-            "funnels": [
-              {
-                "id": "",
-                "name": "Funnel_002",
-                "offers": [
-                  {
-                    "pagename": "cbloto4us",
-                    "title": "City Lips - 4 Tubes, Add-On Only Offer",
-                    "product":
-                    {
-                      "id": 47993623622,
-                      "product_id": 11515486790,
-                      "price": "100.00",
-                      "sku": "CITYADVCLR-FULL-4x",
-                    },
-                    "nextpage": "cbloto3ucl",
-                    "nopage": "cbloto2ds"
-                  },
-                  {
-                    "pagename": "cbloto2ds",
-                    "title": "City Lips - 2 Tubes, Add-On Only Offer",
-                    "product":
-                    {
-                      "id": 47985772166,
-                      "product_id": 11515082566,
-                      "price": "50.00",
-                      "sku": "CITYADVCLR-FULL-2x",
-                    },
-                    "nextpage": "cbloto3ucl",
-                    "nopage": "cbloto3ucl"
-                  },
-                  {
-                    "pagename": "cbloto3ucl",
-                    "title": "City Lips - 3-Color Combo, Add-On Only Offer - 50% Off",
-                    "product":
-                    {
-                      "id": 48547932358,
-                      "product_id": 11553656070,
-                      "price": "60.00",
-                      "sku": "CITYADVNY-TK-HO-FULL",
-                    },
-                    "nextpage": "orderconfirmation",
-                    "nopage": "orderconfirmation"
-                  },
-                ],
-
-              },
-            ]
+          "id": "cbl002",
+          "pagename": "cbl002",
+          "title": "City Lips - 2 Tubes",
+          "product_id": 454963036166,
+          "price": "66.00",
+          "US_funnel": "ccf001"
         },
         {
-            "id": "cc003",
-            "pagename": "cbl003ejaxb",
-            "title": "City Lips - 3 Tubes",
-            "product": {
-              "id": 44739281030,
-              "product_id": 10802518022,
-              "price": "87.00",
-              "sku": "CITYADVCLR-FULL-3x",
-            },
-            "funnels": [
-              {
-                "id": "",
-                "name": "Funnel_003",
-                "offers": [
-                  {
-                    "pagename": "cbloto6us",
-                    "title": "City Lips - 6 Tubes, Add-On Only Offer",
-                    "product":
-                    {
-                      "id": 47993684230,
-                      "product_id": 11515490758,
-                      "price": "150.00",
-                      "sku": "CITYADVCLR-FULL-6x",
-                    },
-                    "nextpage": "cbloto6ucl",
-                    "nopage": "cbloto3ds"
-                  },
-                  {
-                    "pagename": "cbloto3ds",
-                    "title": "City Lips - 3 Tubes, Add-On Only Offer",
-                    "product":
-                    {
-                      "id": 47992534662,
-                      "product_id": 11515426694,
-                      "price": "75.00",
-                      "sku": "CITYADVCLR-FULL-3x",
-                    },
-                    "nextpage": "cbloto6ucl",
-                    "nopage": "cbloto6ucl"
-                  },
-                  {
-                    "pagename": "cbloto6ucl",
-                    "title": "City Lips - 6-Color Combo, Add-On Only Offer - 50% Off",
-                    "product":
-                    {
-                      "id": 48547953862,
-                      "product_id": 11546878534,
-                      "price": "120.00",
-                      "sku": "CITYADVTK-TT-HO-NY-OR-SG-FULL",
-                    },
-                    "nextpage": "orderconfirmation",
-                    "nopage": "orderconfirmation"
-                  },
-                ],
-              },
-            ]
+          "id": "cbl003",
+          "pagename": "cbl003",
+          "title": "City Lips - 3 Tubes",
+          "product_id": 454970212358,
+          "price": "87.00",        
+          "US_funnel": "ccf002",
         },
+    ],
+    "funnels": [
+      {
+        "id": "ccf001",
+        "name": "City Lips 3 Tubes Upsale",
+        "offers": [
+          {
+            "id": "",
+            "pagename": "cbloto3us",
+            "title": "City Lips - 3 Tubes, Add-On Only Offer",
+            "product_id": 454997409798,
+            "price": "75.00",
+            "nextpage": "cbloto3ucl",
+            "nopage": "cbloto1ds"
+          },
+          {
+            "pagename": "cbloto1ds",
+            "title": "City Lips - 1 Tube, Add-On Only Offer",
+            "product_id": 455012777990,
+            "price": "25.00",
+            "nextpage": "cbloto3ucl",
+            "nopage": "cbloto3ucl"
+          },
+          {
+            "pagename": "cbloto3ucl",
+            "title": "City Lips - 3-Color Combo, Add-On Only Offer - 50% Off",
+            "product_id": 455036207110,
+            "price": "60.00",
+            "nextpage": "orderconfirmation",
+            "nopage": "orderconfirmation"
+          },
+        ],
+      },
+      {
+        "id": "ccf002",
+        "name": "City Lips 6 Tubes Upsale",
+        "offers": [
+          {
+            "id": "",
+            "pagename": "cbloto6us",
+            "title": "City Lips - 6 Tubes, Add-On Only Offer",
+            "product_id": 47993684230,
+            "price": "150.00",
+            "nextpage": "cbloto6ucl",
+            "nopage": "cbloto3ds"
+          },
+          {
+            "pagename": "cbloto3ds",
+            "title": "City Lips - 3 Tubes, Add-On Only Offer",
+            "product_id": 454997409798,
+            "price": "75.00",
+            "nextpage": "cbloto6ucl",
+            "nopage": "cbloto6ucl"
+          },
+          {
+            "pagename": "cbloto6ucl",
+            "title": "City Lips - 6-Color Combo, Add-On Only Offer - 50% Off",
+            "product_id": 455051411462,
+            "price": "120.00",
+            "nextpage": "orderconfirmation",
+            "nopage": "orderconfirmation"
+          },
+        ],
+      },
     ],
     "shipRate": {
       "Canada": "9.95",
@@ -193,5 +106,5 @@ module.exports = {
         },
       ]
     }
-},
+  },
 }

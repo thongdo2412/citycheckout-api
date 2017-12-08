@@ -44,7 +44,6 @@ module.exports = [{
         total_tax_amount += parseFloat(item.tax_amount)
         total_amount += parseFloat(item.amount)
       })
-      console.log(total_tax_amount)
       tax_lines.push({"price": total_tax_amount, "rate": tax_rate, "title": "State tax"})
       shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tax_lines,customerEmail,ship_amount)
       
