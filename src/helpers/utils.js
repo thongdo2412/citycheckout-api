@@ -1,6 +1,5 @@
 const KMS = require('aws-sdk/clients/kms');
 const { DynamoTable } = require('../helpers/dynamo');
-const braintree = require('braintree');
 const kms = new KMS();
 const httpReq = require('request-promise')
 const Promise = require('bluebird')
@@ -17,15 +16,6 @@ function responseError(res, body, statusCode = 400) {
 
 function getOrderTable() {
   return new DynamoTable();
-}
-
-function getBrainTreeAuth() {
-  return braintree.connect({
-    environment: braintree.Environment.Sandbox,
-    merchantId: process.env.BT_MERCHANT_ID,
-    publicKey: process.env.BT_PUBLIC_KEY,
-    privateKey: process.env.BT_PRIVATE_KEY
-  });
 }
 
 function postToExtAPI (url,headers,body,contentType) {
@@ -128,7 +118,6 @@ function signData(data,secret_key) {
 module.exports = {
   responseSuccess,
   responseError,
-  getBrainTreeAuth,
   getOrderTable,
   postToThirdParties,
   postToShopify,

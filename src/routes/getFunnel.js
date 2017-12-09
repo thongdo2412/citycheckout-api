@@ -1,7 +1,7 @@
 const { responseError, responseSuccess, getFunnelMap } = require('../helpers/utils');
 const map = require('../resources/funnel_maps/funnel_map')
 module.exports = [{
-  path: '/api/getFunnel',
+  path: '/api/getfunnel',
   method: 'get',
   handler: (req, res) => {
     body = map.funnelNShipping

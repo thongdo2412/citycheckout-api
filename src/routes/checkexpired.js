@@ -5,13 +5,12 @@ module.exports = [{
   path: '/api/checkexpired',
   method: 'post',
   handler: (req, res) => {
-    req.body.checkout_id
     getOrderTable().query(req.body.checkout_id)
     .then(data => { 
-      if (!data.sent_at)
-        return responseSuccess(res, {"expired":"false"})
+      if (data.Count == 0)
+        return responseSuccess(res, {"expired": "true"})
       else 
-        return responseSuccess(res, {"expired":"true"})
+        return responseSuccess(res, {"expired": "false"})
     })
     .catch(err => responseError(res, err))
   }
