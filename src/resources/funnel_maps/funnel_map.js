@@ -1,30 +1,30 @@
 module.exports = {
   funnelNShipping: {
     "checkouts": [
-        {
-          "id": "cbl001",
-          "pagename": "cbl001",
-          "title": "City Lips - 1 Tube",
-          "product_id": 454957826054,
-          "price": "35.00",
-          "US_funnel": "ccf001"
-        },
-        {
-          "id": "cbl002",
-          "pagename": "cbl002",
-          "title": "City Lips - 2 Tubes",
-          "product_id": 454963036166,
-          "price": "66.00",
-          "US_funnel": "ccf001"
-        },
-        {
-          "id": "cbl003",
-          "pagename": "cbl003",
-          "title": "City Lips - 3 Tubes",
-          "product_id": 454970212358,
-          "price": "87.00",        
-          "US_funnel": "ccf002",
-        },
+      {
+        "id": "cbl001",
+        "pagename": "cbl001",
+        "title": "City Lips - 1 Tube",
+        "product_id": 454957826054,
+        "price": "35.00",
+        "US_funnel": "ccf001"
+      },
+      {
+        "id": "cbl002",
+        "pagename": "cbl002",
+        "title": "City Lips - 2 Tubes",
+        "product_id": 454963036166,
+        "price": "66.00",
+        "US_funnel": "ccf001"
+      },
+      {
+        "id": "cbl003",
+        "pagename": "cbl003",
+        "title": "City Lips - 3 Tubes",
+        "product_id": 454970212358,
+        "price": "87.00",        
+        "US_funnel": "ccf002",
+      },
     ],
     "funnels": [
       {
@@ -90,7 +90,7 @@ module.exports = {
         ],
       },
     ],
-    "shipRate": {
+    "ship_rate": {
       "Canada": "9.95",
       "International": "19.95",
       "US": [
