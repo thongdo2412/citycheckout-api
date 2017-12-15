@@ -66,7 +66,7 @@ module.exports = {
             "id": "",
             "pagename": "cbloto6us",
             "title": "City Lips - 6 Tubes, Add-On Only Offer",
-            "product_id": 47993684230,
+            "product_id": 455119470598,
             "price": "150.00",
             "nextpage": "cbloto6ucl",
             "nopage": "cbloto3ds"

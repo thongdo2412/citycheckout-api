@@ -34,7 +34,7 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tax_lines, customerEmail, ship_amount) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, tax_lines, customerEmail, ship_amount) {
   let shippinglines = []
   if (ship_amount > 0) {
       shippinglines.push({
@@ -66,6 +66,7 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
           "customer": customer,
           "shipping_address": shipping,
           "billing_address": billing,
+          "tags": tags,
           "tax_lines": tax_lines,
           "email": customerEmail,
           "total_price": amount,
@@ -76,17 +77,16 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
   return shopifyBody
 }
 
-function postToThirdParties(shopifyBody,cid,payout) {
-  return Promise.all([postToShopify(shopifyBody), postToVoluum(cid,payout)])
+function postToThirdParties(shopifyURL,shopifyBody,cid,payout) {
+  return Promise.all([postToShopify(shopifyURL,shopifyBody), postToVoluum(cid,payout)])
 }
 
-function postToShopify(body) {
-  const shopURL = "https://city-cosmetics.myshopify.com/admin/orders.json"
+function postToShopify(url,body) {
   const headers = {
     "Content-Type": "application/json",
     "X-Shopify-Access-Token": config.shopify.password
   }
-  return postToExtAPI(shopURL,headers,body,"json")
+  return postToExtAPI(url,headers,body,"json")
 }
 
 function postToVoluum(cid,payout) {

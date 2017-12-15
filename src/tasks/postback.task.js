@@ -2,7 +2,7 @@ require('dotenv').config()
 const _ = require('lodash')
 const Promise = require('bluebird')
 const moment = require('moment')
-const { getOrderTable,postToThirdParties,constructShopifyBody } = require('../helpers/utils');
+const { getOrderTable,postToThirdParties,constructShopifyBody,postToShopify } = require('../helpers/utils')
 class PostBackTask {
   constructor () {
   }
@@ -15,7 +15,6 @@ class PostBackTask {
       payload = data
       const grouped = _.mapValues(_.groupBy(data.Items, "key"))
       const keysName = Object.keys(grouped)
-
       const keysMap = keysName.map((name) => { // post multiple to Shopify
         let click_id = ""
         let product_price = 0.0
@@ -30,10 +29,12 @@ class PostBackTask {
         let line_items = []
         let tax_lines = []
         let shopifyBody = {}
+        let tags = ""
+        const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'        
         grouped[name].map((item) => { //construct body for Shopify post
           if (item.click_id) {
             click_id = item.click_id
-            tax_rate = item.tax_rate
+            tax_rate = parseFloat(item.tax_rate).toFixed(2)
             product_price = parseFloat(item.product.price)
             ship_amount = item.shipping_amount
             customer = item.customer
@@ -46,18 +47,32 @@ class PostBackTask {
             if (!billing_address.address2) {
               billing_address.address2 = ""
             }
+            tags = item.payment_token
           }
-          let properties = []
-          properties.push({"name": "CS_trans_id", "value": item.trans_id})
-          line_items.push({"variant_id": item.product.variant_id, "quantity": 1, "properties": properties})
+          line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
           total_amount += parseFloat(item.amount)
           total_tax_amount += parseFloat(item.tax_amount)
         })
-        tax_lines.push({"price": total_tax_amount, "rate": tax_rate, "title": "State tax"})
-        shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tax_lines,customerEmail,ship_amount)
-        return postToThirdParties(shopifyBody,click_id,total_amount)
+        tax_lines.push({"price": total_tax_amount.toFixed(2), "rate": tax_rate, "title": "State tax"})
+        shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tags,tax_lines,customerEmail,ship_amount)
+        return postToThirdParties(shopifyURL,shopifyBody,click_id,total_amount)
       })
       return Promise.all(keysMap)
+    })
+    .then(data => {
+      const metafieldsMap = data.map(item => {
+        const meta_body = {
+          "metafield": {
+            "key": "payment_token",
+              "value": item[0].order.tags,
+              "value_type": "string",
+              "namespace": "global"
+          }
+        }
+        const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${item[0].order.id}/metafields.json`
+        return postToShopify(meta_url, meta_body)
+      })
+      return Promise.all(metafieldsMap)
     })
     .then(data => {
       const dbItems = payload.Items.map((item) => {
@@ -66,9 +81,9 @@ class PostBackTask {
         }
       })
       return Promise.all(dbItems)
+      console.log("end scheduled task postback...")
     })
     .catch(err => console.log(err))
-    console.log("end scheduled task postback...")
   }
 
   run () {

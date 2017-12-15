@@ -69,10 +69,9 @@ module.exports = [{
       const shipping_amount = params.req_merchant_defined_data8
       const tax_amount = params.req_tax_amount
       const tax_rate = params.req_merchant_defined_data11
-      const trans_id = params.transaction_id
       const pmt_token = params.payment_token
 
-      getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, trans_id, pmt_token)
+      getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token)
       .then(data => responseSuccess(res, data))
       .catch((err) => {
         const body = { error_message: `Problem in creating transactions. ${err.display_message}` }
