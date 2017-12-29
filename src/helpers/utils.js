@@ -115,6 +115,55 @@ function signData(data,secret_key) {
   return cryptoJS.enc.Base64.stringify(hash)  
 }
 
+function postToPayPal(body) {
+  body.USER = config.Paypal.user
+  body.PWD = config.Paypal.pwd
+  body.SIGNATURE = config.Paypal.signature
+  body.VERSION = '204'
+  const paypal_url = config.Paypal.sandbox_url
+  return postToExtAPI(paypal_url,{},body,"form")
+}
+
+function strToJSON(data) {
+  data = decodeURI(data) // decode back to UTF
+  data = data.replace("%40","@")
+  let output = data.split('&').reduce(function(o, pair) {
+    pair = pair.split('=')
+    return o[pair[0]] = pair[1], o}, {}
+  )
+  return output
+}
+
+function calTax(data) { // for paypal
+  let rate = 0
+  if (data == "CA") {
+    rate = 0.09
+  }
+  else if (data == "UT") {
+    rate = 0.0676
+  }
+  return rate
+}
+
+function calShipping(data,amount) { // for paypal
+  let rate = 0
+  if (data == 'US') {
+    if (parseFloat(amount) <= 50) {
+      rate = 4.95
+    }
+    else {
+      rate = 0
+    }
+  }
+  else if (data =='CA'){
+    rate = 9.95
+  }
+  else {
+    rate = 19.95
+  }
+  return rate
+}
+
 module.exports = {
   responseSuccess,
   responseError,
@@ -124,4 +173,8 @@ module.exports = {
   postToExtAPI,
   constructShopifyBody,
   sign,
+  strToJSON,
+  postToPayPal,
+  calTax,
+  calShipping,
 };

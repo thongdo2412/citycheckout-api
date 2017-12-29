@@ -4,7 +4,7 @@ module.exports = [{
   method: 'post',
   handler: (req, res) => {
     const params = req.body
-    const CS_URL = 'https://testsecureacceptance.cybersource.com/silent/pay'
+    const CS_URL = 'https://secureacceptance.cybersource.com/silent/pay'
     let CS_body = {}
     const signedDataFields = params.signed_field_names.split(',')
     signedDataFields.map(item=>{

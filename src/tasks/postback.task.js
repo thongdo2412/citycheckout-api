@@ -47,7 +47,7 @@ class PostBackTask {
             if (!billing_address.address2) {
               billing_address.address2 = ""
             }
-            tags = item.payment_token
+            tags = item.transaction_id
           }
           line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
           total_amount += parseFloat(item.amount)

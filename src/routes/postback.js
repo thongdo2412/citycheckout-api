@@ -39,7 +39,7 @@ module.exports = [{
           if (!billing_address.address2) {
             billing_address.address2 = ""
           }
-          tags = item.payment_token
+          tags = item.transaction_id
         }
         line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
         total_tax_amount += parseFloat(item.tax_amount)
@@ -53,9 +53,9 @@ module.exports = [{
       const meta_body = {
         "metafield": {
           "key": "payment_token",
-            "value": data[0].order.tags,
-            "value_type": "string",
-            "namespace": "global"
+          "value": data[0].order.tags,
+          "value_type": "string",
+          "namespace": "global"
         }
       }
       const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${data[0].order.id}/metafields.json`;

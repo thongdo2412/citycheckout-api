@@ -25,7 +25,7 @@ class DynamoTable {
         .then(item => Promise.resolve(item.Item))
   }
 
-  put(key, amount, clickid, customer, shipping_address, billing_address, product, tax_rate, tax_amount, ship_amount, pmt_token) {
+  put(key, amount, clickid, customer, shipping_address, billing_address, product, tax_rate, tax_amount, ship_amount, trans_id, trans_type) {
     const date = moment().format('YYYY-MM-DDTHH:mm:ss:SSS');
     const params ={
       TableName : this.tableName,
@@ -41,7 +41,8 @@ class DynamoTable {
         "tax_rate": tax_rate,
         "tax_amount": tax_amount,
         "shipping_amount": ship_amount,
-        "payment_token": pmt_token,
+        "transaction_id": trans_id,
+        "transaction_type": trans_type
       }
     }
     return db.put(params).promise()

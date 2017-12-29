@@ -2,19 +2,18 @@ const Promise = require('bluebird')
 const { responseError, responseSuccess, postToPayPal, strToJSON } = require('../helpers/utils')
 const map = require('../resources/funnel_maps/funnel_map')
 module.exports = [{
-  path: '/api/test',
-  method: 'get',
+  path: '/api/pcreatebill',
+  method: 'post',
   handler: (req, res) => {
-    console.log("test")
     let pBody = {}
-    pBody.VERSION = '204'
-    pBody.METHOD = 'GetExpressCheckoutDetails'
-    pBody.TOKEN = 'EC-2BR21754KW292341H'
-    // pBody.METHOD = 'DoReferenceTransaction'    
-    // pBody.PAYMENTACTION = 'Sale'
-    // pBody.AMT = '81.75'
-    // pBody.PAYMENTREQUEST_0_CURRENCYCODE = 'USD'
-    // pBody.REFERENCEID = 'B-9JW242425E431145B'
+    pBody.METHOD = 'SetExpressCheckout'
+    pBody.RETURNURL = req.body.return_url
+    pBody.CANCELURL = req.body.cancel_url
+    pBody.PAYMENTREQUEST_0_PAYMENTACTION = 'Sale'
+    pBody.PAYMENTREQUEST_0_AMT = req.body.amount
+    pBody.PAYMENTREQUEST_0_CURRENCYCODE = 'USD'
+    pBody.DESC = 'Funnel_Sale'
+    pBody.L_BILLINGTYPE0 = 'MerchantInitiatedBilling'
 
     postToPayPal(pBody)
     .then(data => { 
