@@ -47,9 +47,21 @@ class PostBackTask {
             if (!billing_address.address2) {
               billing_address.address2 = ""
             }
-            tags = item.transaction_id
+            if (item.transaction_type == 'CS') {
+              tags = item.transaction_id
+            }
+            else if (item.transaction_type == 'PP') {
+              tags = "PP transaction"
+            }
           }
-          line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
+          let properties = []
+          if (item.transaction_type == 'CS') {
+            properties.push({"name": "CS_trans_id", "value": "CS"})
+          }
+          else if (item.transaction_type == 'PP') {
+            properties.push({"name": "PP_trans_id", "value": item.transaction_id})
+          }
+          line_items.push({"variant_id": item.product.variant_id, "quantity": 1, "properties": properties})
           total_amount += parseFloat(item.amount)
           total_tax_amount += parseFloat(item.tax_amount)
         })

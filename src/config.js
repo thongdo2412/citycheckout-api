@@ -14,6 +14,9 @@ module.exports = {
       }
     }
   },
+  citycheckout: {
+    key: process.env.CITY_CHECKOUT_KEY
+  },
   shopify: {
     name: process.env.SHOPIFY_NAME,
     apikey: process.env.SHOPIFY_API_KEY,
@@ -32,6 +35,7 @@ module.exports = {
     user: process.env.PAYPAL_USER,
     pwd: process.env.PAYPAL_PWD,
     signature: process.env.PAYPAL_SIGNATURE,
-    sandbox_url: 'https://api-3t.sandbox.paypal.com/nvp'
+    sandbox_url: 'https://api-3t.sandbox.paypal.com/nvp',
+    production_url: 'https://api-3t.paypal.com/nvp'
   }
 }

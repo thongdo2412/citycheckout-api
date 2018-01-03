@@ -39,15 +39,28 @@ module.exports = [{
           if (!billing_address.address2) {
             billing_address.address2 = ""
           }
-          tags = item.transaction_id
+          if (item.transaction_type == 'CS') {
+            tags = item.transaction_id
+          }
+          else if (item.transaction_type == 'PP') {
+            tags = "PP transaction"
+          }
         }
-        line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
+        let properties = []
+        if (item.transaction_type == 'CS') {
+          properties.push({"name": "CS_trans_id", "value": "CS"})
+        }
+        else if (item.transaction_type == 'PP') {
+          properties.push({"name": "PP_trans_id", "value": item.transaction_id})
+        }
+        line_items.push({"variant_id": item.product.variant_id, "quantity": 1, "properties": properties})
         total_tax_amount += parseFloat(item.tax_amount)
         total_amount += parseFloat(item.amount)
       })
       tax_lines.push({"price": total_tax_amount.toFixed(2), "rate": tax_rate, "title": "State tax"})
       shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tags,tax_lines,customerEmail,ship_amount)
       return postToThirdParties(shopifyURL,shopifyBody,click_id,total_amount)
+      // return postToShopify(shopifyURL,shopifyBody)
     })
     .then(data => {
       const meta_body = {
@@ -71,6 +84,9 @@ module.exports = [{
       return Promise.all(promises)
     })
     .then(data => responseSuccess(res, data))
-    .catch(err => responseError(res, err))
+    .catch(err => {
+      console.log(err)
+      responseError(res, err)
+    })
   }
 }];

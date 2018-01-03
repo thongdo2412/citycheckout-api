@@ -183,7 +183,7 @@ Resources:
       PolicyType: TargetTrackingScaling
       ScalingTargetId: !Ref WriteCapacityScalableTarget
       TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
+        TargetValue: 79.0
         ScaleInCooldown: 60
         ScaleOutCooldown: 60
         PredefinedMetricSpecification:

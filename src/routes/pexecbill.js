@@ -19,12 +19,11 @@ module.exports = [{
     pBody.PAYERID = req.body.payerID
     postToPayPal(pBody)
     .then(data => { 
-        result = strToJSON(data)
-        payload = result
-        shipping_rate = calShipping(result.COUNTRYCODE,result.AMT)
-        tax_rate = calTax(result.SHIPTOSTATE)
-        tax_amount = parseFloat(result.AMT) * tax_rate
-        total_amount = parseFloat(result.AMT) + tax_amount + shipping_rate
+        payload = strToJSON(data)
+        shipping_rate = calShipping(payload.COUNTRYCODE,payload.AMT)
+        tax_rate = calTax(payload.SHIPTOSTATE)
+        tax_amount = parseFloat(payload.AMT) * tax_rate
+        total_amount = parseFloat(payload.AMT) + tax_amount + shipping_rate
         //for db storing
         payload.SHIPPINGAMT = shipping_rate.toFixed(2)
         payload.TAXAMT = tax_amount.toFixed(2)
@@ -33,10 +32,10 @@ module.exports = [{
 
         let nBody = {}
         nBody.METHOD = 'DoExpressCheckoutPayment'
-        nBody.TOKEN = result.TOKEN
-        nBody.PAYERID = result.PAYERID
+        nBody.TOKEN = payload.TOKEN
+        nBody.PAYERID = payload.PAYERID
         nBody.PAYMENTREQUEST_0_PAYMENTACTION = 'Sale'
-        nBody.PAYMENTREQUEST_0_ITEMAMT = result.AMT
+        nBody.PAYMENTREQUEST_0_ITEMAMT = payload.AMT
         nBody.PAYMENTREQUEST_0_SHIPPINGAMT = shipping_rate.toFixed(2)
         nBody.PAYMENTREQUEST_0_TAXAMT = tax_amount.toFixed(2)
         nBody.PAYMENTREQUEST_0_AMT = total_amount.toFixed(2)
@@ -44,8 +43,7 @@ module.exports = [{
         return postToPayPal(nBody)  
     })
     .then(data => {
-        result = strToJSON(data)
-        payload2 = result
+        payload2 = strToJSON(data)
         payload2.tax_rate = payload.tax_rate
         const customer = {
             "first_name": payload.FIRSTNAME,
@@ -70,7 +68,7 @@ module.exports = [{
             "country": payload.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE
         }
         const billing_address = shipping_address  
-        return getOrderTable().put(checkout_id,result.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload.tax_rate,payload.TAXAMT,payload.SHIPPINGAMT,result.PAYMENTINFO_0_TRANSACTIONID,"PP")
+        return getOrderTable().put(checkout_id,payload2.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload2.tax_rate,payload2.PAYMENTINFO_0_TAXAMT,payload.SHIPPINGAMT,payload2.PAYMENTINFO_0_TRANSACTIONID,"PP")
     })
     .then(data => responseSuccess(res, payload2))
     .catch(err => responseError(res, err))
