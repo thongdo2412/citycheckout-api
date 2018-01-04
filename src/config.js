@@ -32,9 +32,9 @@ module.exports = {
     secret: process.env.PAYPAL_SECRET,
     sandbox: process.env.PAYPAL_SANDBOX,
     production: process.env.PAYPAL_PRODUCTION,
-    user: process.env.PAYPAL_USER,
-    pwd: process.env.PAYPAL_PWD,
-    signature: process.env.PAYPAL_SIGNATURE,
+    user: process.env.PAYPAL_USER_SB,
+    pwd: process.env.PAYPAL_PWD_SB,
+    signature: process.env.PAYPAL_SIGNATURE_SB,
     sandbox_url: 'https://api-3t.sandbox.paypal.com/nvp',
     production_url: 'https://api-3t.paypal.com/nvp'
   }

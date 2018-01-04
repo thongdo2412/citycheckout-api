@@ -2,7 +2,7 @@ require('dotenv').config()
 const _ = require('lodash')
 const Promise = require('bluebird')
 const moment = require('moment')
-const { getOrderTable,postToThirdParties,constructShopifyBody,postToShopify } = require('../helpers/utils')
+const { getOrderTable,constructShopifyBody,postToShopify,postToVoluum } = require('../helpers/utils')
 class PostBackTask {
   constructor () {
   }
@@ -10,6 +10,7 @@ class PostBackTask {
     const timeStamp = moment().format('YYYY-MM-DDTHH:mm:ss:SSS')
     console.log(`begin postback scheduled task at...${timeStamp}`)
     let payload = {}
+    let voluum_pb = []
     getOrderTable().scan()
     .then((data) => {
       payload = data
@@ -65,9 +66,10 @@ class PostBackTask {
           total_amount += parseFloat(item.amount)
           total_tax_amount += parseFloat(item.tax_amount)
         })
+        voluum_pb.push({"click_id": click_id,"total_amount":total_amount})
         tax_lines.push({"price": total_tax_amount.toFixed(2), "rate": tax_rate, "title": "State tax"})
         shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tags,tax_lines,customerEmail,ship_amount)
-        return postToThirdParties(shopifyURL,shopifyBody,click_id,total_amount)
+        return postToShopify(shopifyURL,shopifyBody)
       })
       return Promise.all(keysMap)
     })
@@ -76,12 +78,12 @@ class PostBackTask {
         const meta_body = {
           "metafield": {
             "key": "payment_token",
-              "value": item[0].order.tags,
+              "value": item.order.tags,
               "value_type": "string",
               "namespace": "global"
           }
         }
-        const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${item[0].order.id}/metafields.json`
+        const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${item.order.id}/metafields.json`
         return postToShopify(meta_url, meta_body)
       })
       return Promise.all(metafieldsMap)
@@ -93,6 +95,12 @@ class PostBackTask {
         }
       })
       return Promise.all(dbItems)
+    })
+    .then(data =>{
+      const volItems = voluum_pb.map((item) =>{
+        return postToVoluum(item.click_id,item.total_amount)
+      })
+      return Promise.all(volItems)
       console.log("end scheduled task postback...")
     })
     .catch(err => console.log(err))

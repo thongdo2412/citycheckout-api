@@ -44,31 +44,36 @@ module.exports = [{
     })
     .then(data => {
         payload2 = strToJSON(data)
-        payload2.tax_rate = payload.tax_rate
-        const customer = {
-            "first_name": payload.FIRSTNAME,
-            "last_name": payload.LASTNAME,
-            "email": payload.EMAIL
-        }
-    
-        const product = {
-        "variant_id": productVariantId
-        }
+        if (payload2.ACK == "Success" || payload2.ACK == "SuccessWithWarning") {
+            payload2.tax_rate = payload.tax_rate
+            const customer = {
+                "first_name": payload.FIRSTNAME,
+                "last_name": payload.LASTNAME,
+                "email": payload.EMAIL
+            }
+        
+            const product = {
+            "variant_id": productVariantId
+            }
 
-        const shipping_address = {
-            "first_name": payload.FIRSTNAME,
-            "last_name": payload.LASTNAME,
-            "company": "",
-            "address1": payload.PAYMENTREQUEST_0_SHIPTOSTREET,
-            "address2": payload.PAYMENTREQUEST_0_SHIPTOSTREET2,
-            "province": payload.PAYMENTREQUEST_0_SHIPTOSTATE,
-            "city": payload.PAYMENTREQUEST_0_SHIPTOCITY,
-            "phone": payload.PAYMENTREQUEST_0_SHIPTOPHONENUM,
-            "zip": payload.PAYMENTREQUEST_0_SHIPTOZIP,
-            "country": payload.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE
+            const shipping_address = {
+                "first_name": payload.FIRSTNAME,
+                "last_name": payload.LASTNAME,
+                "company": "",
+                "address1": payload.PAYMENTREQUEST_0_SHIPTOSTREET,
+                "address2": payload.PAYMENTREQUEST_0_SHIPTOSTREET2,
+                "province": payload.PAYMENTREQUEST_0_SHIPTOSTATE,
+                "city": payload.PAYMENTREQUEST_0_SHIPTOCITY,
+                "phone": payload.PAYMENTREQUEST_0_SHIPTOPHONENUM,
+                "zip": payload.PAYMENTREQUEST_0_SHIPTOZIP,
+                "country": payload.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE
+            }
+            const billing_address = shipping_address  
+            return getOrderTable().put(checkout_id,payload2.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload2.tax_rate,payload2.PAYMENTINFO_0_TAXAMT,payload.SHIPPINGAMT,payload2.PAYMENTINFO_0_TRANSACTIONID,"PP")
         }
-        const billing_address = shipping_address  
-        return getOrderTable().put(checkout_id,payload2.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload2.tax_rate,payload2.PAYMENTINFO_0_TAXAMT,payload.SHIPPINGAMT,payload2.PAYMENTINFO_0_TRANSACTIONID,"PP")
+        else {
+            return responseError(res,payload2)
+        }
     })
     .then(data => responseSuccess(res, payload2))
     .catch(err => responseError(res, err))

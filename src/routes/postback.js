@@ -1,22 +1,22 @@
 const Promise = require('bluebird')
 const config = require('../config')
-const { responseError, responseSuccess, getOrderTable, postToThirdParties, constructShopifyBody, postToShopify } = require('../helpers/utils')
+const { responseError, responseSuccess, getOrderTable, constructShopifyBody, postToShopify, postToVoluum } = require('../helpers/utils')
 module.exports = [{
   path: '/api/postback',
   method: 'post',
   handler: (req, res) => {
     const checkoutID = req.body.checkoutID
     let payload = {}
+    let click_id = ""
+    let total_amount = 0.0
     getOrderTable().query(checkoutID)
     .then((data) => {
       let tags = ""    
-      let click_id = ""
       let tax_rate = 0.0
       let customerEmail = ""
       let customer = {}
       let shipping_address = {}
       let billing_address = {}
-      let total_amount = 0.0
       let ship_amount = 0.0
       let total_tax_amount = 0.0
       let line_items = []
@@ -59,19 +59,20 @@ module.exports = [{
       })
       tax_lines.push({"price": total_tax_amount.toFixed(2), "rate": tax_rate, "title": "State tax"})
       shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tags,tax_lines,customerEmail,ship_amount)
-      return postToThirdParties(shopifyURL,shopifyBody,click_id,total_amount)
-      // return postToShopify(shopifyURL,shopifyBody)
+      // return postToThirdParties(shopifyURL,shopifyBody,click_id,total_amount)
+      return postToShopify(shopifyURL,shopifyBody)
     })
     .then(data => {
+      console.log(data.order.tags)
       const meta_body = {
         "metafield": {
           "key": "payment_token",
-          "value": data[0].order.tags,
+          "value": data.order.tags,
           "value_type": "string",
           "namespace": "global"
         }
       }
-      const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${data[0].order.id}/metafields.json`;
+      const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${data.order.id}/metafields.json`;
       return postToShopify(meta_url, meta_body)
     })
     .then(data => {
@@ -82,6 +83,9 @@ module.exports = [{
         }
       })
       return Promise.all(promises)
+    })
+    .then(data => {
+      return postToVoluum(click_id,total_amount)
     })
     .then(data => responseSuccess(res, data))
     .catch(err => {
