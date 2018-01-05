@@ -69,7 +69,7 @@ module.exports = [{
                 "country": payload.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE
             }
             const billing_address = shipping_address  
-            return getOrderTable().put(checkout_id,payload2.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload2.tax_rate,payload2.PAYMENTINFO_0_TAXAMT,payload.SHIPPINGAMT,payload2.PAYMENTINFO_0_TRANSACTIONID,"PP")
+            return getOrderTable().put(checkout_id,payload2.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload2.tax_rate,payload2.PAYMENTINFO_0_TAXAMT,payload.SHIPPINGAMT,payload2.PAYMENTINFO_0_TRANSACTIONID,"PP","parent")
         }
         else {
             return responseError(res,payload2)

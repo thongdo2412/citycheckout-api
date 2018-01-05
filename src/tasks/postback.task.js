@@ -2,7 +2,7 @@ require('dotenv').config()
 const _ = require('lodash')
 const Promise = require('bluebird')
 const moment = require('moment')
-const { getOrderTable,constructShopifyBody,postToShopify,postToVoluum } = require('../helpers/utils')
+const { getOrderTable,constructShopifyBody,postToShopify,postToVoluum,putToShopify } = require('../helpers/utils')
 class PostBackTask {
   constructor () {
   }
@@ -11,33 +11,27 @@ class PostBackTask {
     console.log(`begin postback scheduled task at...${timeStamp}`)
     let payload = {}
     let voluum_pb = []
+    const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'            
     getOrderTable().scan()
     .then((data) => {
       payload = data
       const grouped = _.mapValues(_.groupBy(data.Items, "key"))
       const keysName = Object.keys(grouped)
-      const keysMap = keysName.map((name) => { // post multiple to Shopify
+      const keysMap = keysName.map((name) => { // post multiple orders to Shopify with different checkoutids
         let click_id = ""
-        let product_price = 0.0
         let tax_rate = 0.0
         let customerEmail = ""
         let customer = {}
         let shipping_address = {}
         let billing_address = {}
         let total_amount = 0.0
-        let ship_amount = 0.0
-        let total_tax_amount = 0.0
-        let line_items = []
-        let tax_lines = []
-        let shopifyBody = {}
-        let tags = ""
-        const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'        
-        grouped[name].map((item) => { //construct body for Shopify post
+        
+        grouped[name].map((item) => { 
           if (item.click_id) {
-            click_id = item.click_id
-            tax_rate = parseFloat(item.tax_rate).toFixed(2)
-            product_price = parseFloat(item.product.price)
-            ship_amount = item.shipping_amount
+            click_id = item.click_id // holds clickid for Voluum postback
+          }
+          total_amount += parseFloat(item.amount)
+          if (item.order_type == "parent") {
             customer = item.customer
             customerEmail = customer.email
             shipping_address = item.shipping_address
@@ -48,45 +42,81 @@ class PostBackTask {
             if (!billing_address.address2) {
               billing_address.address2 = ""
             }
-            if (item.transaction_type == 'CS') {
-              tags = item.transaction_id
-            }
-            else if (item.transaction_type == 'PP') {
-              tags = "PP transaction"
-            }
+            tax_rate = item.tax_rate
           }
-          let properties = []
-          if (item.transaction_type == 'CS') {
-            properties.push({"name": "CS_trans_id", "value": "CS"})
-          }
-          else if (item.transaction_type == 'PP') {
-            properties.push({"name": "PP_trans_id", "value": item.transaction_id})
-          }
-          line_items.push({"variant_id": item.product.variant_id, "quantity": 1, "properties": properties})
-          total_amount += parseFloat(item.amount)
-          total_tax_amount += parseFloat(item.tax_amount)
         })
-        voluum_pb.push({"click_id": click_id,"total_amount":total_amount})
-        tax_lines.push({"price": total_tax_amount.toFixed(2), "rate": tax_rate, "title": "State tax"})
-        shopifyBody = constructShopifyBody(line_items,total_amount,customer,shipping_address,billing_address,tags,tax_lines,customerEmail,ship_amount)
-        return postToShopify(shopifyURL,shopifyBody)
+
+        orderPromises = grouped[name].map((item) => { //construct body and post to Shopify with same checkoutid
+          let tags = ""
+          let note = ""
+          let line_items = []
+          let tax_lines = []
+          let shopifyBody = {}
+
+          tags = item.transaction_id
+          if (item.order_type == "parent"){
+            note = "parent"
+          }
+          else if (item.order_type == "child") {
+            note = "child"
+          }
+          line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
+          tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
+          shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,tax_lines,customerEmail,item.shipping_amount)
+          return postToShopify(shopifyURL,shopifyBody)
+        })
+        voluum_pb.push({"click_id": click_id,"total_amount":total_amount}) // data for Voluum postback
+        return Promise.all(orderPromises)
       })
       return Promise.all(keysMap)
     })
     .then(data => {
-      const metafieldsMap = data.map(item => {
-        const meta_body = {
-          "metafield": {
-            "key": "payment_token",
-              "value": item.order.tags,
-              "value_type": "string",
-              "namespace": "global"
+      let chkoutPromises = []
+      let ordersPromises = []
+
+      chkoutPromises = data.map(chkout_item => {
+        let parent_num = ""
+        let child_nums = ""
+
+        chkout_item.map(order_item => {
+          if (order_item.order.note == "parent") {
+            parent_num = order_item.order.name
           }
-        }
-        const meta_url = `https://city-cosmetics.myshopify.com/admin/orders/${item.order.id}/metafields.json`
-        return postToShopify(meta_url, meta_body)
+          else if (order_item.order.note == "child") {
+            child_nums += `${order_item.order.name},`
+          }
+        })
+        ordersPromises = chkout_item.map(order_item => {
+          let note = ""
+          if (data.length != 1) {
+            if (order_item.order.note == "parent") {
+              note = `Upsell orders: ${child_nums}`
+            }
+            else if (order_item.order.note == "child") {
+              note = `Parent order: ${parent_num}`
+            }
+          }
+        
+          order_body = {
+            "order": {
+              "id": order_item.order.id,
+              "note": note,
+              "metafields": [
+                {
+                  "key": "transaction_id",
+                  "value": order_item.order.tags,
+                  "value_type": "string",
+                  "namespace": "global"
+                }
+              ]
+            }
+          }
+          const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${order_item.order.id}.json`;
+          return putToShopify(order_url, order_body)
+        })
+        return Promise.all(ordersPromises)
       })
-      return Promise.all(metafieldsMap)
+      return Promise.all(chkoutPromises)
     })
     .then(data => {
       const dbItems = payload.Items.map((item) => {

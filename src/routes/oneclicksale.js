@@ -40,7 +40,7 @@ module.exports = [{
         const product = {
           "variant_id": params.merchant_defined_data7
           }
-        return getOrderTable().put(params.merchant_defined_data5,payload.AMT,'','','','',product,params.merchant_defined_data11,params.tax_amount,'',payload.TRANSACTIONID,'PP')
+        return getOrderTable().put(params.merchant_defined_data5,payload.AMT,'','','','',product,params.merchant_defined_data11,params.tax_amount,params.merchant_defined_data8,payload.TRANSACTIONID,'PP','child')
       })
       .then(data => {
         payload.gateway = 'pp'

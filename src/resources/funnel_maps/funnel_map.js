@@ -29,7 +29,7 @@ module.exports = {
     "funnels": [
       {
         "id": "ccf001",
-        "name": "City Lips 3 Tubes Upsale",
+        "name": "City Lips 3 Tubes Upsell",
         "offers": [
           {
             "id": "",
@@ -60,7 +60,7 @@ module.exports = {
       },
       {
         "id": "ccf002",
-        "name": "City Lips 6 Tubes Upsale",
+        "name": "City Lips 6 Tubes Upsell",
         "offers": [
           {
             "id": "",

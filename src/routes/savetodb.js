@@ -69,9 +69,17 @@ module.exports = [{
       const shipping_amount = params.req_merchant_defined_data8
       const tax_amount = params.req_tax_amount
       const tax_rate = params.req_merchant_defined_data11
-      const pmt_token = params.payment_token
+      let pmt_token = ""
+      if (params.payment_token) {
+        pmt_token = params.payment_token
+        order_type = "parent"
+      }
+      else {
+        pmt_token = params.req_payment_token
+        order_type = "child"
+      }
 
-      getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token,"CS")
+      getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token, "CS", order_type)
       .then(data => responseSuccess(res, data))
       .catch((err) => {
         const body = { error_message: `Problem in creating transactions. ${err.display_message}` }
