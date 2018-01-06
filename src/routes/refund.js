@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, postToPayPal, postToExtAPI } = require('../helpers/utils')
+const { responseError, responseSuccess, postToPayPal, postToExtAPI, getFrShopify } = require('../helpers/utils')
 const Promise = require('bluebird')
 const config = require('../config')
 module.exports = [{
@@ -6,38 +6,47 @@ module.exports = [{
   method: 'post',
   handler: (req, res) => {
     console.log("starting refund...")
-    if (req.headers['x-kotn-webhook-verified'] != '200'){
+    if (req.headers['citycheckout-hmac-sha256'] != config.citycheckout.key){
       console.log('invalid signature for webhook')
       res.status(204).send()
       return
     }else {
       const params = req.body
-      const refund = params.refund_line_items
-      const gateway = refund[0].line_item.properties[0].name
-      if (gateway == 'CS_trans_id') {
-        headers = {
-          "CITYCHECKOUT-HMAC-SHA256": config.citycheckout.key
-        }
-        postToExtAPI('https://citybeauty.com/checkout/cybersource/src/CreditPayment.php',headers,params)
-        .then(data => responseSuccess(res, {}))
-        .catch(err => responseError(res, err))
-      }
-      else if (gateway == 'PP_trans_id') {
-        let trans_id = ""
-        let promises = []
-        promises = refund.map((item) => { // assuming properties attribute used to store BT, name :"BT_trans_id"
-          trans_id = item.line_item.properties[0].value
-          if (trans_id) {
+      let gateway = ""
+      let trans_id = ""
+      const url = `https://city-cosmetics.myshopify.com/admin/orders/${params.order_id}.json`
+      const refund_amount = params.refund_amount
+      getFrShopify(url)
+      .then(data => {
+        gateway = data.order.note_attributes[0].value
+        metafield_url = `https://city-cosmetics.myshopify.com/admin/orders/${params.order_id}/metafields.json`
+        return getFrShopify(metafield_url)
+      })
+      .then(data => {
+        if (data.metafields[0].value) {
+          trans_id = data.metafields[0].value
+          if (gateway == 'CS') {
+            headers = {
+              "CITYCHECKOUT-HMAC-SHA256": config.citycheckout.key
+            }
+            cs_body = {
+              "transaction_id": trans_id,
+              "amount": refund_amount
+            }
+            return postToExtAPI('https://citybeauty.com/checkout/cybersource/src/CreditPayment.php',headers,cs_body,"json")
+          }
+          else if (gateway == 'PP') {
             let pBody = {}
             pBody.METHOD = 'RefundTransaction'
+            pBody.REFUNDTYPE = 'Partial'
+            pBody.AMT = refund_amount
             pBody.TRANSACTIONID = trans_id
             return postToPayPal(pBody)
           }
-        })
-        Promise.all(promises)
-        .then(data => responseSuccess(res, {}))
-        .catch(err => responseError(res, err))
-      }
+        }
+      })
+      .then(data => responseSuccess(res, data))
+      .catch(err => responseError(res, err))
     }
   }
 }];

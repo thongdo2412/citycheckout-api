@@ -45,29 +45,7 @@ module.exports = [{
         let line_items = []
         let tax_lines = []
         let shopifyBody = {}
-        
-        // if (item.click_id) { // parent order and copy all the customer's info
-        //   click_id = item.click_id // for voluum postback
-        //   tax_rate = parseFloat(item.tax_rate).toFixed(2)
-        //   ship_amount = item.shipping_amount
-        //   customer = item.customer
-        //   customerEmail = customer.email
-        //   shipping_address = item.shipping_address
-        //   if (!shipping_address.address2) {
-        //     shipping_address.address2 = ""
-        //   }
-        //   billing_address = item.billing_address
-        //   if (!billing_address.address2) {
-        //     billing_address.address2 = ""
-        //   }
-        //   if (item.transaction_type == 'CS') {
-        //     tags = item.transaction_id
-        //   }
-        //   else if (item.transaction_type == 'PP') {
-        //     tags = "PP_transaction"
-        //   }
-        // }
-        tags = item.transaction_id
+       
         if (item.order_type == "parent"){
           note = "parent"
         }
@@ -75,9 +53,10 @@ module.exports = [{
           note = "child"
         }
 
+        tags = item.transaction_id
         line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
         tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
-        shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,tax_lines,customerEmail,item.shipping_amount)
+        shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount)
         return postToShopify(shopifyURL,shopifyBody)
       })
       return Promise.all(ordersPromises)
@@ -92,7 +71,7 @@ module.exports = [{
           parent_num = item.order.name
         }
         else if (item.order.note == "child") {
-          child_nums += `${item.order.name},`
+          child_nums += `${item.order.name} `
         }
       })
 

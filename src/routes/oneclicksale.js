@@ -23,9 +23,10 @@ module.exports = [{
         responseError(res, body);
       })
     }
-    else if (gateway == 'pp') {
+    else if (params.gateway == 'pp') {
       let pBody = {}
       let payload = {}
+      let item_amount = 0.0
       pBody.METHOD = 'DoReferenceTransaction'
       pBody.PAYMENTACTION = 'Sale'
       pBody.CURRENCYCODE = 'USD'

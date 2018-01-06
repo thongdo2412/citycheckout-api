@@ -53,16 +53,16 @@ class PostBackTask {
           let tax_lines = []
           let shopifyBody = {}
 
-          tags = item.transaction_id
           if (item.order_type == "parent"){
             note = "parent"
           }
           else if (item.order_type == "child") {
             note = "child"
           }
+          tags = item.transaction_id
           line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
           tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
-          shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,tax_lines,customerEmail,item.shipping_amount)
+          shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount)
           return postToShopify(shopifyURL,shopifyBody)
         })
         voluum_pb.push({"click_id": click_id,"total_amount":total_amount}) // data for Voluum postback
@@ -90,7 +90,7 @@ class PostBackTask {
           let note = ""
           if (data.length != 1) {
             if (order_item.order.note == "parent") {
-              note = `Upsell orders: ${child_nums}`
+              note = `Upsell orders: ${child_nums} `
             }
             else if (order_item.order.note == "child") {
               note = `Parent order: ${parent_num}`

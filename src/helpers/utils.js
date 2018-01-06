@@ -34,7 +34,7 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, tax_lines, customerEmail, ship_amount) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, transaction_type, tax_lines, customerEmail, ship_amount) {
   let shippinglines = []
   if (ship_amount > 0) {
       shippinglines.push({
@@ -68,6 +68,12 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
           "billing_address": billing,
           "tags": tags,
           "note": note,
+          "note_attributes": [
+            {
+              "name": "gateway",
+              "value": transaction_type
+            }
+          ],
           "tax_lines": tax_lines,
           "email": customerEmail,
           "total_price": amount,
@@ -105,6 +111,19 @@ function putToShopify(url,body) {
   return httpReq(options)
 }
 
+function getFrShopify(url) {
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Shopify-Access-Token": config.shopify.password
+  }
+  let options = {
+    uri: url,
+    headers: headers,
+    json: true
+  }
+  return httpReq(options)
+}
+
 function postToVoluum(cid,payout) {
   const volURL = "https://vmhlw.voluumtrk2.com/postback"
   body = {
@@ -137,7 +156,7 @@ function postToPayPal(body) {
   body.SIGNATURE = config.Paypal.signature
   body.VERSION = '204'
   const paypal_url = config.Paypal.sandbox_url
-  // const paypal_url = config.Paypal.production_url
+  const paypal_url = config.Paypal.production_url
   return postToExtAPI(paypal_url,{},body,"form")
 }
 
@@ -195,4 +214,5 @@ module.exports = {
   postToPayPal,
   calTax,
   calShipping,
+  getFrShopify,
 };
