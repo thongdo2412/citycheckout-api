@@ -155,7 +155,7 @@ function postToPayPal(body) {
   body.PWD = config.Paypal.pwd
   body.SIGNATURE = config.Paypal.signature
   body.VERSION = '204'
-  const paypal_url = config.Paypal.sandbox_url
+  // const paypal_url = config.Paypal.sandbox_url
   const paypal_url = config.Paypal.production_url
   return postToExtAPI(paypal_url,{},body,"form")
 }

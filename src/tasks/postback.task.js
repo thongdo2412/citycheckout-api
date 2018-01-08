@@ -24,6 +24,7 @@ class PostBackTask {
         let customer = {}
         let shipping_address = {}
         let billing_address = {}
+        let orderPromises = []
         let total_amount = 0.0
         
         grouped[name].map((item) => { 
@@ -83,14 +84,17 @@ class PostBackTask {
             parent_num = order_item.order.name
           }
           else if (order_item.order.note == "child") {
-            child_nums += `${order_item.order.name},`
+            child_nums += `${order_item.order.name} `
           }
         })
+
         ordersPromises = chkout_item.map(order_item => {
           let note = ""
-          if (data.length != 1) {
+          let order_body = {}
+
+          if (chkout_item.length != 1) {
             if (order_item.order.note == "parent") {
-              note = `Upsell orders: ${child_nums} `
+              note = `Upsell orders: ${child_nums}`
             }
             else if (order_item.order.note == "child") {
               note = `Parent order: ${parent_num}`
