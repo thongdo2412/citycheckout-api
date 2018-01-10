@@ -34,53 +34,67 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, transaction_type, tax_lines, customerEmail, ship_amount) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, transaction_type, tax_lines, customerEmail, ship_amount, discount_amt) {
   let shippinglines = []
+  let discount_codes = []
   if (ship_amount > 0) {
-      shippinglines.push({
-          "title": "Standard Shipping (3-5 Business Days)",
-          "price": `${ship_amount}`,
-          "code": "CITY_FLAT",
-          "source": "CITY_flat"
-      })
-    }
-    else {
-      shippinglines.push({
-        "title": "Free Standard Shipping (3-5 Business Days)",
-        "price": "0.00",
+    shippinglines.push({
+        "title": "Standard Shipping (3-5 Business Days)",
+        "price": `${ship_amount}`,
         "code": "CITY_FLAT",
         "source": "CITY_flat"
-      })
-    }
-  shopifyBody = {
-        "order": {
-          "line_items": line_items,
-          "transactions": [
-            {
-              "kind": "sale",
-              "status": "success",
-              "amount": amount
-            }
-          ],
-          "shipping_lines": shippinglines,
-          "customer": customer,
-          "shipping_address": shipping,
-          "billing_address": billing,
-          "tags": tags,
-          "note": note,
-          "note_attributes": [
-            {
-              "name": "gateway",
-              "value": transaction_type
-            }
-          ],
-          "tax_lines": tax_lines,
-          "email": customerEmail,
-          "total_price": amount,
-          "total_tax": tax_lines[0].price,
-          "currency": "USD"
-        }
+    })
   }
+  else {
+    shippinglines.push({
+      "title": "Free Standard Shipping (3-5 Business Days)",
+      "price": "0.00",
+      "code": "CITY_FLAT",
+      "source": "CITY_flat"
+    })
+  }
+
+  if (discount_amt > 0) {
+    discount_codes = [
+      {
+        "code": "ADDONSDISCT",
+        "amount": discount_amt,
+        "type": "fixed_amount"
+      }
+    ]
+  }
+
+    shopifyBody = {
+      "order": {
+        "line_items": line_items,
+        "transactions": [
+          {
+            "kind": "sale",
+            "status": "success",
+            "amount": amount
+          }
+        ],
+        "shipping_lines": shippinglines,
+        "customer": customer,
+        "shipping_address": shipping,
+        "billing_address": billing,
+        "tags": tags,
+        "note": note,
+        "note_attributes": [
+          {
+            "name": "gateway",
+            "value": transaction_type
+          }
+        ],
+        "discount_codes": discount_codes,
+        "tax_lines": tax_lines,
+        "email": customerEmail,
+        "total_discounts": discount_amt,
+        "total_price": amount,
+        "total_tax": tax_lines[0].price,
+        "currency": "USD"
+      }
+    }
   return shopifyBody
 }
 

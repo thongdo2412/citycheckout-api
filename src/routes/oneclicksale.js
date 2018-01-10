@@ -39,8 +39,10 @@ module.exports = [{
       .then(data => {
         payload = strToJSON(data)
         const product = {
-          "variant_id": params.merchant_defined_data7
-          }
+          "variant_id": params.merchant_defined_data7,
+          "quantity": params.merchant_defined_data12,
+          "discount_amt": params.merchant_defined_data13
+        }
         return getOrderTable().put(params.merchant_defined_data5,payload.AMT,'','','','',product,params.merchant_defined_data11,params.tax_amount,params.merchant_defined_data8,payload.TRANSACTIONID,'PP','child')
       })
       .then(data => {

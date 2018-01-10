@@ -14,6 +14,8 @@ module.exports = [{
     const checkout_id = req.body.checkoutid
     const click_id = req.body.clickid
     const productVariantId = req.body.productVariantId
+    const quantity = String(req.body.quantity)
+    const discount_amt = String(req.body.discount_amt)
     pBody.METHOD = 'GetExpressCheckoutDetails'
     pBody.TOKEN = req.body.paymentToken
     pBody.PAYERID = req.body.payerID
@@ -53,7 +55,9 @@ module.exports = [{
             }
         
             const product = {
-            "variant_id": productVariantId
+                "variant_id": productVariantId,
+                "quantity": quantity,
+                "discount_amt": discount_amt
             }
 
             const shipping_address = {

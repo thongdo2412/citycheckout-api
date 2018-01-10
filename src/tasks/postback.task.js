@@ -52,6 +52,7 @@ class PostBackTask {
           let note = ""
           let line_items = []
           let tax_lines = []
+          let variant_arr = []
           let shopifyBody = {}
 
           if (item.order_type == "parent"){
@@ -61,7 +62,15 @@ class PostBackTask {
             note = "child"
           }
           tags = item.transaction_id
-          line_items.push({"variant_id": item.product.variant_id, "quantity": 1})
+          variant_arr = item.product.variant_id.split(",") // for color combo orders
+          if (variant_arr.length > 1) {
+            variant_arr.map(variant => {
+              line_items.push({"variant_id": variant, "quantity": item.product.quantity})
+            })
+          }
+          else {
+            line_items.push({"variant_id": item.product.variant_id, "quantity": item.product.quantity})
+          }
           tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
           shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount)
           return postToShopify(shopifyURL,shopifyBody)

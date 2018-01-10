@@ -21,7 +21,9 @@ module.exports = [{
       }
 
       const product = {
-        "variant_id": params.req_merchant_defined_data7
+        "variant_id": params.req_merchant_defined_data7,
+        "quantity": params.req_merchant_defined_data12,
+        "discount_amount": params.req_merchant_defined_data13
       }
 
       //check if those optional fields are blank
