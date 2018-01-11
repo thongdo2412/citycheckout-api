@@ -37,6 +37,14 @@ function postToExtAPI (url,headers,body,contentType) {
 function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, transaction_type, tax_lines, customerEmail, ship_amount, discount_amt) {
   let shippinglines = []
   let discount_codes = []
+  let gateway = ""
+
+  if (transaction_type == "PP") {
+    gateway = "PayPal" 
+  } else if (transaction_type = "CS") {
+    gateway = "CyberSource"
+  }
+
   if (ship_amount > 0) {
     shippinglines.push({
         "title": "Standard Shipping (3-5 Business Days)",
@@ -57,7 +65,7 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
   if (discount_amt > 0) {
     discount_codes = [
       {
-        "code": "ADDONSDISCT",
+        "code": "FTC-PROMO",
         "amount": discount_amt,
         "type": "fixed_amount"
       }
@@ -83,7 +91,7 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
         "note_attributes": [
           {
             "name": "gateway",
-            "value": transaction_type
+            "value": gateway
           }
         ],
         "discount_codes": discount_codes,

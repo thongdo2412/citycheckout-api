@@ -16,29 +16,8 @@ module.exports = [{
       let shipping_address = {}
       let billing_address = {}
       let ordersPromises = []
-      let tax_rate = 0.0
       const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
       payload = data
-      data.Items.map((item) => {
-        //for voluum postback
-        total_amount += parseFloat(item.amount)
-        if (item.click_id) { 
-          click_id = item.click_id // for voluum postback 
-        } 
-        if (item.order_type == "parent") {
-          customer = item.customer
-          customerEmail = customer.email
-          shipping_address = item.shipping_address
-          if (!shipping_address.address2) {
-            shipping_address.address2 = ""
-          }
-          billing_address = item.billing_address
-          if (!billing_address.address2) {
-            billing_address.address2 = ""
-          }
-          tax_rate = item.tax_rate
-        }
-      })
       ordersPromises = data.Items.map((item) => { // construct Shopify order
         let tags = ""
         let note = ""
@@ -46,7 +25,25 @@ module.exports = [{
         let tax_lines = []
         let variant_arr = []
         let shopifyBody = {}
+
+        //for voluum postback
+        total_amount += parseFloat(item.amount)
+        if (item.click_id) { 
+          click_id = item.click_id 
+        } 
+
+        customer = item.customer
+        customerEmail = customer.email
+        shipping_address = item.shipping_address
+        if (!shipping_address.address2) {
+          shipping_address.address2 = ""
+        }
+        billing_address = item.billing_address
+        if (!billing_address.address2) {
+          billing_address.address2 = ""
+        }
        
+        // identify if the order is parent or child order
         if (item.order_type == "parent"){
           note = "parent"
         }
@@ -64,7 +61,7 @@ module.exports = [{
         else {
           line_items.push({"variant_id": item.product.variant_id, "quantity": item.product.quantity})
         }
-        tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
+        tax_lines.push({"price": item.tax_amount, "rate": item.tax_rate, "title": "State tax"})
         shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount,item.product.discount_amount)
         return postToShopify(shopifyURL,shopifyBody)
       })

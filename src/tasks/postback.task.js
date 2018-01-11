@@ -19,7 +19,6 @@ class PostBackTask {
       const keysName = Object.keys(grouped)
       const keysMap = keysName.map((name) => { // post multiple orders to Shopify with different checkoutids
         let click_id = ""
-        let tax_rate = 0.0
         let customerEmail = ""
         let customer = {}
         let shipping_address = {}
@@ -27,25 +26,25 @@ class PostBackTask {
         let orderPromises = []
         let total_amount = 0.0
         
-        grouped[name].map((item) => { 
-          if (item.click_id) {
-            click_id = item.click_id // holds clickid for Voluum postback
-          }
-          total_amount += parseFloat(item.amount)
-          if (item.order_type == "parent") {
-            customer = item.customer
-            customerEmail = customer.email
-            shipping_address = item.shipping_address
-            if (!shipping_address.address2) {
-              shipping_address.address2 = ""
-            }
-            billing_address = item.billing_address
-            if (!billing_address.address2) {
-              billing_address.address2 = ""
-            }
-            tax_rate = item.tax_rate
-          }
-        })
+        // grouped[name].map((item) => { 
+        //   if (item.click_id) {
+        //     click_id = item.click_id // holds clickid for Voluum postback
+        //   }
+        //   total_amount += parseFloat(item.amount)
+        //   if (item.order_type == "parent") {
+        //     customer = item.customer
+        //     customerEmail = customer.email
+        //     shipping_address = item.shipping_address
+        //     if (!shipping_address.address2) {
+        //       shipping_address.address2 = ""
+        //     }
+        //     billing_address = item.billing_address
+        //     if (!billing_address.address2) {
+        //       billing_address.address2 = ""
+        //     }
+        //     tax_rate = item.tax_rate
+        //   }
+        // })
 
         orderPromises = grouped[name].map((item) => { //construct body and post to Shopify with same checkoutid
           let tags = ""
@@ -55,6 +54,24 @@ class PostBackTask {
           let variant_arr = []
           let shopifyBody = {}
 
+          // for Voluum postback
+          if (item.click_id) {
+            click_id = item.click_id 
+          }
+          total_amount += parseFloat(item.amount)
+
+          customer = item.customer
+          customerEmail = customer.email
+          shipping_address = item.shipping_address
+          if (!shipping_address.address2) {
+            shipping_address.address2 = ""
+          }
+          billing_address = item.billing_address
+          if (!billing_address.address2) {
+            billing_address.address2 = ""
+          }
+          
+          // identify if the order is parent or child order
           if (item.order_type == "parent"){
             note = "parent"
           }
@@ -71,7 +88,7 @@ class PostBackTask {
           else {
             line_items.push({"variant_id": item.product.variant_id, "quantity": item.product.quantity})
           }
-          tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
+          tax_lines.push({"price": item.tax_amount, "rate": item.tax_rate, "title": "State tax"})
           shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount,item.product.discount_amount)
           return postToShopify(shopifyURL,shopifyBody)
         })
