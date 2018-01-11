@@ -99,6 +99,20 @@ class DynamoTable {
     return db.query(params).promise()
   }
 
+  queryAll(key) {
+    const params = {
+      TableName : this.tableName,
+      KeyConditionExpression: "#pk = :pk",
+      ExpressionAttributeNames:{
+        "#pk": "key"
+      },
+      ExpressionAttributeValues: {
+        ":pk": key,
+      },
+    }
+    return db.query(params).promise()
+  }
+
 }
 
 module.exports = {

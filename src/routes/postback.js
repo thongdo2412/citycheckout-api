@@ -65,7 +65,7 @@ module.exports = [{
           line_items.push({"variant_id": item.product.variant_id, "quantity": item.product.quantity})
         }
         tax_lines.push({"price": item.tax_amount, "rate": tax_rate, "title": "State tax"})
-        shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount,item.product.discount_amt)
+        shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount,item.product.discount_amount)
         return postToShopify(shopifyURL,shopifyBody)
       })
       return Promise.all(ordersPromises)

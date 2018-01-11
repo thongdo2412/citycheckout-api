@@ -38,12 +38,25 @@ module.exports = [{
       postToPayPal(pBody)
       .then(data => {
         payload = strToJSON(data)
+        return getOrderTable().queryAll(params.merchant_defined_data5)
+      })
+      .then(data => {
+        let customer = {}
+        let shipping_address = {}
+        let billing_address = {}
+        data.Items.map((item) => {
+          if (item.order_type == "parent") {
+            customer = item.customer
+            shipping_address = item.shipping_address
+            billing_address = item.billing_address
+          }
+        })
         const product = {
           "variant_id": params.merchant_defined_data7,
           "quantity": params.merchant_defined_data12,
-          "discount_amt": params.merchant_defined_data13
+          "discount_amount": params.merchant_defined_data13
         }
-        return getOrderTable().put(params.merchant_defined_data5,payload.AMT,'','','','',product,params.merchant_defined_data11,params.tax_amount,params.merchant_defined_data8,payload.TRANSACTIONID,'PP','child')
+        return getOrderTable().put(params.merchant_defined_data5,payload.AMT,'',customer,shipping_address,billing_address,product,params.merchant_defined_data11,params.tax_amount,params.merchant_defined_data8,payload.TRANSACTIONID,'PP','child')
       })
       .then(data => {
         payload.gateway = 'pp'
