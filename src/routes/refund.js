@@ -5,12 +5,12 @@ module.exports = [{
   path: '/api/refund',
   method: 'post',
   handler: (req, res) => {
-    console.log("starting refund...")
     if (req.headers['citycheckout-hmac-sha256'] != config.citycheckout.key){
       console.log('invalid signature for webhook')
       res.status(204).send()
       return
     }else {
+      console.log("starting refund...")
       const params = req.body
       let gateway = ""
       let trans_id = ""
@@ -19,13 +19,13 @@ module.exports = [{
       getFrShopify(url)
       .then(data => {
         gateway = data.order.note_attributes[0].value
-        metafield_url = `https://city-cosmetics.myshopify.com/admin/orders/${params.order_id}/metafields.json`
+        const metafield_url = `https://city-cosmetics.myshopify.com/admin/orders/${params.order_id}/metafields.json`
         return getFrShopify(metafield_url)
       })
       .then(data => {
         if (data.metafields[0].value) {
           trans_id = data.metafields[0].value
-          if (gateway == 'CS') {
+          if (gateway == 'CyberSource') {
             headers = {
               "CITYCHECKOUT-HMAC-SHA256": config.citycheckout.key
             }
@@ -35,7 +35,7 @@ module.exports = [{
             }
             return postToExtAPI('https://citybeauty.com/checkout/cybersource/src/CreditPayment.php',headers,cs_body,"json")
           }
-          else if (gateway == 'PP') {
+          else if (gateway == 'PayPal') {
             let pBody = {}
             pBody.METHOD = 'RefundTransaction'
             pBody.REFUNDTYPE = 'Partial'

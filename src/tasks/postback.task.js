@@ -25,26 +25,6 @@ class PostBackTask {
         let billing_address = {}
         let orderPromises = []
         let total_amount = 0.0
-        
-        // grouped[name].map((item) => { 
-        //   if (item.click_id) {
-        //     click_id = item.click_id // holds clickid for Voluum postback
-        //   }
-        //   total_amount += parseFloat(item.amount)
-        //   if (item.order_type == "parent") {
-        //     customer = item.customer
-        //     customerEmail = customer.email
-        //     shipping_address = item.shipping_address
-        //     if (!shipping_address.address2) {
-        //       shipping_address.address2 = ""
-        //     }
-        //     billing_address = item.billing_address
-        //     if (!billing_address.address2) {
-        //       billing_address.address2 = ""
-        //     }
-        //     tax_rate = item.tax_rate
-        //   }
-        // })
 
         orderPromises = grouped[name].map((item) => { //construct body and post to Shopify with same checkoutid
           let tags = ""
@@ -90,6 +70,7 @@ class PostBackTask {
           }
           tax_lines.push({"price": item.tax_amount, "rate": item.tax_rate, "title": "State tax"})
           shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount,item.product.discount_amount)
+          // console.log(shopifyBody.order)
           return postToShopify(shopifyURL,shopifyBody)
         })
         voluum_pb.push({"click_id": click_id,"total_amount":total_amount}) // data for Voluum postback
@@ -156,7 +137,7 @@ class PostBackTask {
       })
       return Promise.all(dbItems)
     })
-    .then(data =>{
+    .then(data => {
       const volItems = voluum_pb.map((item) =>{
         return postToVoluum(item.click_id,item.total_amount)
       })

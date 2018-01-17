@@ -10,6 +10,7 @@ module.exports = [{
     pBody.RETURNURL = req.body.return_url
     pBody.CANCELURL = req.body.cancel_url
     pBody.PAYMENTREQUEST_0_PAYMENTACTION = 'Sale'
+    pBody.PAYMENTREQUEST_0_DESC = req.body.product_title
     pBody.PAYMENTREQUEST_0_AMT = req.body.amount
     pBody.PAYMENTREQUEST_0_CURRENCYCODE = 'USD'
     pBody.DESC = 'Funnel_Sale'
