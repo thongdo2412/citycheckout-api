@@ -37,5 +37,12 @@ module.exports = {
     signature: process.env.PAYPAL_SIGNATURE,
     sandbox_url: 'https://api-3t.sandbox.paypal.com/nvp',
     production_url: 'https://api-3t.paypal.com/nvp'
+  },
+  AMZ: {
+    client_id: process.env.AMZ_CLIENT_ID,
+    client_secret: process.env.AMZ_CLIENT_SECRET,
+    merchant_id: process.env.AMZ_MERCHANT_ID,
+    access_key: process.env.AMZ_ACCESS_KEY,
+    secret_key: process.env.AMZ_SECRET_KEY
   }
 }

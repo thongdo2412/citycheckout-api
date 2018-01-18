@@ -183,8 +183,7 @@ function postToPayPal(body) {
 }
 
 function strToJSON(data) {
-  data = decodeURI(data) // decode back to UTF
-  data = data.replace("%40","@")
+  data = decodeURIComponent(data) // decode back to UTF
   let output = data.split('&').reduce(function(o, pair) {
     pair = pair.split('=')
     return o[pair[0]] = pair[1], o}, {}

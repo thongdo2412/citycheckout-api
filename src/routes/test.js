@@ -8,13 +8,19 @@ module.exports = [{
   method: 'get',
   handler: (req, res) => {
     console.log("test")
-    let pBody = {}
-    pBody.METHOD = 'RefundTransaction'
-    pBody.REFUNDTYPE = 'Partial'
-    pBody.AMT = refund_amount
-    pBody.TRANSACTIONID = trans_id
-    return postToPayPal(pBody)
-    .then(data => responseSuccess(res, data))
+    // // B-04504769AC0697338
+    // let pBody = {}
+    // pBody.METHOD = 'DoReferenceTransaction'
+    // pBody.DESC = 'City Lips - 3 Tubes, Add-On Only Offer'
+    // pBody.PAYMENTACTION = 'Sale'
+    // pBody.CURRENCYCODE = 'USD'
+    // pBody.REFERENCEID = 'B-04504769AC0697338'
+    // pBody.AMT = '81.75'
+    // pBody.TAXAMT = '6.75'
+    // item_amount = 75.00
+    // pBody.ITEMAMT = item_amount.toFixed(2)
+    // postToPayPal(pBody)
+    responseSuccess(res, {"test": "ok"})
     .catch(err => {
       console.log(err)
       responseError(res, err)
