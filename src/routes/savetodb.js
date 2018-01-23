@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, getOrderTable } = require('../helpers/utils');
+const { responseError, responseSuccess, getOrderTable, constructShopifyBody, postToShopify, putToShopify } = require('../helpers/utils');
 module.exports = [{
   path: '/api/savetodb',
   method: 'post',
@@ -7,12 +7,23 @@ module.exports = [{
     let company = ""
     let billing_company = ""
     let ship_to_address_line2 = ""
-    let bill_to_address_line2 = ""
+    let bill_to_address_line2 = "" 
     if (params.reason_code == '100') {
+      const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
       const checkout_id = params.req_merchant_defined_data5
       const amount = params.req_amount
       const click_id = params.req_merchant_defined_data6
       const phone = params.req_ship_to_phone
+
+      let order_type = ""
+      let tags = ""
+      let note = ""
+      let line_items = []
+      let tax_lines = []
+      let variant_arr = []
+      let shopifyBody = {}
+      let shopify_order_id = ""
+      let shopify_order_name = ""
 
       const customer = {
         "first_name": params.req_ship_to_forename,
@@ -74,14 +85,51 @@ module.exports = [{
       let pmt_token = ""
       if (params.payment_token) {
         pmt_token = params.payment_token
-        order_type = "parent"
+        order_type = "parent order"
+        note = "parent order"
+        tags = pmt_token
       }
       else {
         pmt_token = params.req_payment_token
-        order_type = "child"
+        order_type = "upsell order"
+        note = "upsell order"
+        tags = pmt_token
       }
 
-      getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token, "CS", order_type)
+      variant_arr = params.req_merchant_defined_data7.split(",") // for color combo orders
+      if (variant_arr.length > 1) {
+        variant_arr.map(variant => {
+          line_items.push({"variant_id": variant, "quantity": params.req_merchant_defined_data12})
+        })
+      }
+      else {
+        line_items.push({"variant_id": params.req_merchant_defined_data7, "quantity": params.req_merchant_defined_data12})
+      }
+      tax_lines.push({"price": tax_amount, "rate": tax_rate, "title": "State tax"})
+      shopifyBody = constructShopifyBody(line_items,amount,customer,shipping_address,billing_address,tags,note,"CyberSource",tax_lines,customer.email,shipping_amount,product.discount_amount)
+      postToShopify(shopifyURL,shopifyBody)
+      .then (data => {
+        shopify_order_id = data.order.id
+        shopify_order_name = data.order.name
+        let order_body = {
+          "order": {
+            "id": data.order.id,
+            "metafields": [
+              {
+                "key": "transaction_id",
+                "value": data.order.tags,
+                "value_type": "string",
+                "namespace": "global"
+              }
+            ]
+          }
+        }
+        const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${data.order.id}.json`;
+        return putToShopify(order_url, order_body)
+      })
+      .then (data => {
+        return getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token, "CyberSource", order_type, shopify_order_id, shopify_order_name)
+      })
       .then(data => responseSuccess(res, data))
       .catch((err) => {
         const body = { error_message: `Problem in creating transactions. ${err.display_message}` }

@@ -34,17 +34,9 @@ function postToExtAPI (url,headers,body,contentType) {
   return httpReq(options)
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, transaction_type, tax_lines, customerEmail, ship_amount, discount_amt) {
+// components to construct Shopify body for the order post
+function getShippingLines(ship_amount) {
   let shippinglines = []
-  let discount_codes = []
-  let gateway = ""
-
-  if (transaction_type == "PP") {
-    gateway = "PayPal" 
-  } else if (transaction_type = "CS") {
-    gateway = "CyberSource"
-  }
-
   if (ship_amount > 0) {
     shippinglines.push({
         "title": "Standard Shipping (3-5 Business Days)",
@@ -61,7 +53,11 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
       "source": "CITY_flat"
     })
   }
+  return shippinglines
+}
 
+function getDiscountCodes (discount_amt) {
+  let discount_codes = []
   if (discount_amt > 0) {
     discount_codes = [
       {
@@ -71,38 +67,44 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
       }
     ]
   }
+  return discount_codes
+}
 
-    shopifyBody = {
-      "order": {
-        "line_items": line_items,
-        "transactions": [
-          {
-            "kind": "sale",
-            "status": "success",
-            "amount": amount
-          }
-        ],
-        "shipping_lines": shippinglines,
-        "customer": customer,
-        "shipping_address": shipping,
-        "billing_address": billing,
-        "tags": tags,
-        "note": note,
-        "note_attributes": [
-          {
-            "name": "gateway",
-            "value": gateway
-          }
-        ],
-        "discount_codes": discount_codes,
-        "tax_lines": tax_lines,
-        "email": customerEmail,
-        "total_discounts": discount_amt,
-        "total_price": amount,
-        "total_tax": tax_lines[0].price,
-        "currency": "USD"
-      }
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, gateway, tax_lines, customerEmail, ship_amount, discount_amt) {
+  const shippinglines = getShippingLines(ship_amount)
+  const discount_codes = getDiscountCodes(discount_amt)
+
+  shopifyBody = {
+    "order": {
+      "line_items": line_items,
+      "transactions": [
+        {
+          "kind": "sale",
+          "status": "success",
+          "amount": amount
+        }
+      ],
+      "shipping_lines": shippinglines,
+      "customer": customer,
+      "email": customerEmail,
+      "shipping_address": shipping,
+      "billing_address": billing,
+      "tags": tags,
+      "note": note,
+      "note_attributes": [
+        {
+          "name": "gateway",
+          "value": gateway
+        }
+      ],
+      "discount_codes": discount_codes,
+      "tax_lines": tax_lines,
+      "total_discounts": discount_amt,
+      "total_price": amount,
+      "total_tax": tax_lines[0].price,
+      "currency": "USD"
     }
+  }
   return shopifyBody
 }
 

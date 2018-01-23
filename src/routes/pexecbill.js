@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const { responseError, responseSuccess, postToPayPal, getOrderTable, strToJSON, calTax, calShipping } = require('../helpers/utils')
+const { responseError, responseSuccess, postToPayPal, getOrderTable, strToJSON, calTax, calShipping, constructShopifyBody, postToShopify, putToShopify } = require('../helpers/utils')
 const map = require('../resources/funnel_maps/funnel_map')
 module.exports = [{
   path: '/api/pexecbill',
@@ -11,6 +11,8 @@ module.exports = [{
     let tax_rate = 0.0
     let tax_amount = 0.0
     let shipping_rate = 0.0
+    let total_amount = 0.0
+    const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
     const checkout_id = req.body.checkoutid
     const click_id = req.body.clickid
     const productVariantId = req.body.productVariantId
@@ -28,8 +30,8 @@ module.exports = [{
         tax_amount = parseFloat(payload.AMT) * tax_rate
         total_amount = parseFloat(payload.AMT) + tax_amount + shipping_rate
         //for db storing
-        payload.SHIPPINGAMT = shipping_rate.toFixed(2)
-        payload.TAXAMT = tax_amount.toFixed(2)
+        payload.shipping_rate = shipping_rate.toFixed(2)
+        payload.tax_amount = tax_amount.toFixed(2)
         payload.tax_rate = tax_rate.toFixed(2)
         payload.total_amount = total_amount.toFixed(2)
 
@@ -48,24 +50,25 @@ module.exports = [{
     })
     .then(data => {
         payload2 = strToJSON(data)
+        payload2.tax_rate = payload.tax_rate
         if (payload2.ACK == "Success" || payload2.ACK == "SuccessWithWarning") {
-            payload2.tax_rate = payload.tax_rate
-            const customer = {
+             //for db storing
+            payload.customer = {
                 "first_name": payload.FIRSTNAME,
                 "last_name": payload.LASTNAME,
                 "email": payload.EMAIL
             }
         
-            const product = {
+            payload.product = {
                 "variant_id": productVariantId,
                 "quantity": quantity,
                 "discount_amount": discount_amt
             }
 
-            const shipping_address = {
+            payload.shipping_address = {
                 "first_name": payload.FIRSTNAME,
                 "last_name": payload.LASTNAME,
-                "company": "",
+                "company": payload.BUSINESS,
                 "address1": payload.PAYMENTREQUEST_0_SHIPTOSTREET,
                 "address2": payload.PAYMENTREQUEST_0_SHIPTOSTREET2,
                 "province": payload.PAYMENTREQUEST_0_SHIPTOSTATE,
@@ -74,12 +77,41 @@ module.exports = [{
                 "zip": payload.PAYMENTREQUEST_0_SHIPTOZIP,
                 "country": payload.PAYMENTREQUEST_0_SHIPTOCOUNTRYCODE
             }
-            const billing_address = shipping_address
-            payload2.customer = customer
-            payload2.shipping_address = shipping_address
-            payload2.billing_address = billing_address
-      
-            return getOrderTable().put(checkout_id,payload2.PAYMENTINFO_0_AMT,click_id,customer,shipping_address,billing_address,product,payload2.tax_rate,payload2.PAYMENTINFO_0_TAXAMT,payload.SHIPPINGAMT,payload2.PAYMENTINFO_0_TRANSACTIONID,"PP","parent")
+            payload.billing_address = payload.shipping_address
+            payload.transaction_id = payload2.PAYMENTINFO_0_TRANSACTIONID
+            
+            let tags = payload2.PAYMENTINFO_0_TRANSACTIONID
+            let line_items = []
+            let tax_lines = []
+            let shopifyBody = {}
+
+            line_items.push({"variant_id": productVariantId, "quantity": quantity})
+            tax_lines.push({"price": payload2.PAYMENTINFO_0_TAXAMT, "rate": payload.tax_rate, "title": "State tax"})
+            shopifyBody = constructShopifyBody(line_items,payload2.PAYMENTINFO_0_AMT,payload.customer,payload.shipping_address,payload.billing_address,tags,"parent order","PayPal",tax_lines,payload.customer.email,payload.shipping_rate,discount_amt)
+            console.log(shopifyBody.order)
+            return postToShopify(shopifyURL,shopifyBody)
+            .then (data => {
+                payload.shopify_order_id = data.order.id
+                payload.shopify_order_name = data.order.name
+                let order_body = {
+                    "order": {
+                      "id": data.order.id,
+                      "metafields": [
+                        {
+                          "key": "transaction_id",
+                          "value": data.order.tags,
+                          "value_type": "string",
+                          "namespace": "global"
+                        }
+                      ]
+                    }
+                  }
+                const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${data.order.id}.json`;
+                return putToShopify(order_url, order_body)
+            })
+            .then (data => {
+                return getOrderTable().put(checkout_id,payload.total_amount,click_id,payload.customer,payload.shipping_address,payload.billing_address,payload.product,payload.tax_rate,payload.tax_amount,payload.shipping_rate,payload.transaction_id,"PayPal","parent order",payload.shopify_order_id,payload.shopify_order_name)
+            })
         }
         else {
             return responseError(res,payload2)

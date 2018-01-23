@@ -19,115 +19,51 @@ class PostBackTask {
       const keysName = Object.keys(grouped)
       const keysMap = keysName.map((name) => { // post multiple orders to Shopify with different checkoutids
         let click_id = ""
-        let customerEmail = ""
-        let customer = {}
-        let shipping_address = {}
-        let billing_address = {}
         let orderPromises = []
         let total_amount = 0.0
+        let parent_num = ""
+        let child_nums = ""
 
-        orderPromises = grouped[name].map((item) => { //construct body and post to Shopify with same checkoutid
-          let tags = ""
-          let note = ""
-          let line_items = []
-          let tax_lines = []
-          let variant_arr = []
-          let shopifyBody = {}
-
+        grouped[name].map((item) => { //construct body and post to Shopify with same checkoutid
           // for Voluum postback
           if (item.click_id) {
             click_id = item.click_id 
           }
           total_amount += parseFloat(item.amount)
-
-          customer = item.customer
-          customerEmail = customer.email
-          shipping_address = item.shipping_address
-          if (!shipping_address.address2) {
-            shipping_address.address2 = ""
-          }
-          billing_address = item.billing_address
-          if (!billing_address.address2) {
-            billing_address.address2 = ""
-          }
           
           // identify if the order is parent or child order
-          if (item.order_type == "parent"){
-            note = "parent"
+          if (item.order_type == "parent order"){
+            parent_num = item.shopify_order_name
           }
-          else if (item.order_type == "child") {
-            note = "child"
+          else if (item.order_type == "upsell order") {
+            child_nums += `${item.shopify_order_name} `
           }
-          tags = item.transaction_id
-          variant_arr = item.product.variant_id.split(",") // for color combo orders
-          if (variant_arr.length > 1) {
-            variant_arr.map(variant => {
-              line_items.push({"variant_id": variant, "quantity": item.product.quantity})
-            })
+        })
+
+        orderPromises = grouped[name].map((item) => {
+          let note = ""
+          if (data.Count > 1) {
+            if (item.order_type == "parent order") {
+              note = `Upsell orders: ${child_nums}`
+            }
+            else if (item.order_type == "upsell order") {
+              note = `Parent order: ${parent_num}`
+            }
           }
-          else {
-            line_items.push({"variant_id": item.product.variant_id, "quantity": item.product.quantity})
+          
+          order_body = {
+            "order": {
+              "id": item.shopify_order_id,
+              "note": note
+            }
           }
-          tax_lines.push({"price": item.tax_amount, "rate": item.tax_rate, "title": "State tax"})
-          shopifyBody = constructShopifyBody(line_items,item.amount,customer,shipping_address,billing_address,tags,note,item.transaction_type,tax_lines,customerEmail,item.shipping_amount,item.product.discount_amount)
-          // console.log(shopifyBody.order)
-          return postToShopify(shopifyURL,shopifyBody)
+          const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${item.shopify_order_id}.json`;
+          return putToShopify(order_url, order_body)
         })
         voluum_pb.push({"click_id": click_id,"total_amount":total_amount}) // data for Voluum postback
         return Promise.all(orderPromises)
       })
       return Promise.all(keysMap)
-    })
-    .then(data => {
-      let chkoutPromises = []
-      let ordersPromises = []
-
-      chkoutPromises = data.map(chkout_item => {
-        let parent_num = ""
-        let child_nums = ""
-
-        chkout_item.map(order_item => {
-          if (order_item.order.note == "parent") {
-            parent_num = order_item.order.name
-          }
-          else if (order_item.order.note == "child") {
-            child_nums += `${order_item.order.name} `
-          }
-        })
-
-        ordersPromises = chkout_item.map(order_item => {
-          let note = ""
-          let order_body = {}
-
-          if (chkout_item.length != 1) {
-            if (order_item.order.note == "parent") {
-              note = `Upsell orders: ${child_nums}`
-            }
-            else if (order_item.order.note == "child") {
-              note = `Parent order: ${parent_num}`
-            }
-          }
-        
-          order_body = {
-            "order": {
-              "id": order_item.order.id,
-              "note": note,
-              "metafields": [
-                {
-                  "key": "transaction_id",
-                  "value": order_item.order.tags,
-                  "value_type": "string",
-                  "namespace": "global"
-                }
-              ]
-            }
-          }
-          const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${order_item.order.id}.json`;
-          return putToShopify(order_url, order_body)
-        })
-        return Promise.all(ordersPromises)
-      })
-      return Promise.all(chkoutPromises)
     })
     .then(data => {
       const dbItems = payload.Items.map((item) => {

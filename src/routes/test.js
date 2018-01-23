@@ -20,7 +20,9 @@ module.exports = [{
     // item_amount = 75.00
     // pBody.ITEMAMT = item_amount.toFixed(2)
     // postToPayPal(pBody)
-    responseSuccess(res, {"test": "ok"})
+    // responseSuccess(res, {"test": "ok"})
+    getOrderTable().query("be2a79d43312bfeb14b11eeffd97fbd")
+    .then(data => responseSuccess(res, data))
     .catch(err => {
       console.log(err)
       responseError(res, err)
