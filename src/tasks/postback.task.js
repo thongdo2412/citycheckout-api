@@ -51,7 +51,7 @@ class PostBackTask {
             }
           }
           
-          order_body = {
+          let order_body = {
             "order": {
               "id": item.shopify_order_id,
               "note": note
