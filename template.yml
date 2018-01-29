@@ -21,6 +21,7 @@ Resources:
               Principal:
                 Service:
                   - "lambda.amazonaws.com"
+
   ApiGatewayApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -72,6 +73,7 @@ Resources:
                 requestTemplates:
                   application/json: "{\"statusCode\": 200}"
                 type: mock
+
   CityCheckoutFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -95,6 +97,7 @@ Resources:
         #   Type: Schedule
         #   Properties:
         #     Schedule: rate(5 minutes)
+
   CityCheckoutCronFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -133,6 +136,18 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+  ReadCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 50
+      MinCapacity: 5
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref OrderTable
+      RoleARN: !GetAtt ScalingRole.Arn
+      ScalableDimension: dynamodb:table:ReadCapacityUnits
+      ServiceNamespace: dynamodb      
   WriteCapacityScalableTarget:
     Type: "AWS::ApplicationAutoScaling::ScalableTarget"
     Properties:
@@ -176,6 +191,18 @@ Resources:
                   - "cloudwatch:SetAlarmState"
                   - "cloudwatch:DeleteAlarms"
                 Resource: "*"
+  ReadScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: ReadAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref ReadCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBReadCapacityUtilization              
   WriteScalingPolicy:
     Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
     Properties:
