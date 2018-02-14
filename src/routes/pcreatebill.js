@@ -5,6 +5,7 @@ module.exports = [{
   path: '/api/pcreatebill',
   method: 'post',
   handler: (req, res) => {
+    console.log("Create Paypal Express checkout endpoint...")
     let pBody = {}
     pBody.METHOD = 'SetExpressCheckout'
     pBody.RETURNURL = req.body.return_url

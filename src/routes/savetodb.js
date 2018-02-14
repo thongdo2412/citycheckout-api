@@ -3,6 +3,7 @@ module.exports = [{
   path: '/api/savetodb',
   method: 'post',
   handler: (req, res) => {
+    console.log("Received post request from Cybersource and save to DB endpoint...")
     const params = req.body
     let company = ""
     let billing_company = ""

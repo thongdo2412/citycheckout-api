@@ -88,7 +88,6 @@ module.exports = [{
             line_items.push({"variant_id": productVariantId, "quantity": quantity})
             tax_lines.push({"price": payload2.PAYMENTINFO_0_TAXAMT, "rate": payload.tax_rate, "title": "State tax"})
             shopifyBody = constructShopifyBody(line_items,payload2.PAYMENTINFO_0_AMT,payload.customer,payload.shipping_address,payload.billing_address,tags,"parent order","PayPal",tax_lines,payload.customer.email,payload.shipping_rate,discount_amt)
-            console.log(shopifyBody.order)
             return postToShopify(shopifyURL,shopifyBody)
             .then (data => {
                 payload.shopify_order_id = data.order.id
@@ -114,6 +113,7 @@ module.exports = [{
             })
         }
         else {
+            console.log(payload2.L_LONGMESSAGE0)
             return responseError(res,payload2)
         }
     })

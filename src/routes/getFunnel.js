@@ -4,7 +4,13 @@ module.exports = [{
   path: '/api/getfunnel',
   method: 'get',
   handler: (req, res) => {
+    console.log("getFunnel endpoint...")
     body = map.funnelNShipping
-    return responseSuccess(res,body)
+    if (body) {
+      responseSuccess(res,body)
+    }
+    else {
+      responseError(res,{"error":"true"})
+    }
   }
 }];

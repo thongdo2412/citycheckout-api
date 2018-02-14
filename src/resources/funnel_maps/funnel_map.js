@@ -59,14 +59,44 @@ module.exports = {
           },
           {
             "pagename": "cbloto3ucl",
-            "title": "City Lips - 3-Color Combo, Add-On Only Offer - 50% Off",
-            "product_id": "689546330118,689546395654,689546493958",
-            "price": "60.00",
+            "title": "City Lips - 3-Color Combo, Add-On Only Offer",
+            "product_id": "689546330118,689546395654,454651379718",
+            "price": "87.00",
             "quantity": 1,
-            "discount_amt": 60,
+            "discount_amt": 18,
+            "nextpage": "cbloto3ucf",
+            "nopage": "cbloto1dcl"
+          },
+          {
+            "pagename": "cbloto1dcl",
+            "title": "City Lips - Color Tube, Add-On Only Offer",
+            "product_id": "780103385094",
+            "price": "25.00",
+            "quantity": 1,
+            "discount_amt": 10,
+            "nextpage": "cbloto3ucf",
+            "nopage": "cbloto3ucf"
+          },
+          {
+            "pagename": "cbloto3ucf",
+            "title": "City Face - 3 Jars, Add-On Only Offer",
+            "product_id": "1033300869126",
+            "price": "80.40",
+            "quantity": 1,
+            "discount_amt": 0,
+            "nextpage": "orderconfirmation",
+            "nopage": "cbloto1dcf"
+          },
+          {
+            "pagename": "cbloto1dcf",
+            "title": "City Face - 1 Jar, Add-On Only Offer",
+            "product_id": "1033294118918",
+            "price": "35.50",
+            "quantity": 1,
+            "discount_amt": 0,
             "nextpage": "orderconfirmation",
             "nopage": "orderconfirmation"
-          },
+          }
         ],
       },
       {
@@ -81,7 +111,7 @@ module.exports = {
             "price": "150.00",
             "quantity": 6,
             "discount_amt": 60,
-            "nextpage": "cbloto6ucl",
+            "nextpage": "cbloto3ucl",
             "nopage": "cbloto3ds"
           },
           {
@@ -91,19 +121,49 @@ module.exports = {
             "price": "75.00",
             "quantity": 3,
             "discount_amt": 30,
-            "nextpage": "cbloto6ucl",
-            "nopage": "cbloto6ucl"
+            "nextpage": "cbloto3ucl",
+            "nopage": "cbloto3ucl"
           },
           {
-            "pagename": "cbloto6ucl",
-            "title": "City Lips - 6-Color Combo, Add-On Only Offer - 50% Off",
-            "product_id": "689546428422,780084740102,780083200006,689546461190,689546526726,780103385094",
-            "price": "120.00",
+            "pagename": "cbloto3ucl",
+            "title": "City Lips - 3-Color Combo, Add-On Only Offer",
+            "product_id": "689546330118,689546395654,454651379718",
+            "price": "87.00",
             "quantity": 1,
-            "discount_amt": 120,
+            "discount_amt": 18,
+            "nextpage": "cbloto3ucf",
+            "nopage": "cbloto1dcl"
+          },
+          {
+            "pagename": "cbloto1dcl",
+            "title": "City Lips - Color Tube, Add-On Only Offer",
+            "product_id": "780103385094",
+            "price": "25.00",
+            "quantity": 1,
+            "discount_amt": 10,
+            "nextpage": "cbloto3ucf",
+            "nopage": "cbloto3ucf"
+          },
+          {
+            "pagename": "cbloto3ucf",
+            "title": "City Face - 3 Jars, Add-On Only Offer",
+            "product_id": "1033300869126",
+            "price": "80.40",
+            "quantity": 1,
+            "discount_amt": 0,
+            "nextpage": "orderconfirmation",
+            "nopage": "cbloto1dcf"
+          },
+          {
+            "pagename": "cbloto1dcf",
+            "title": "City Face - 1 Jar, Add-On Only Offer",
+            "product_id": "1033294118918",
+            "price": "35.50",
+            "quantity": 1,
+            "discount_amt": 0,
             "nextpage": "orderconfirmation",
             "nopage": "orderconfirmation"
-          },
+          }
         ],
       },
     ],

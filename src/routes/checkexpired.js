@@ -5,6 +5,7 @@ module.exports = [{
   path: '/api/checkexpired',
   method: 'post',
   handler: (req, res) => {
+    console.log("checkexpired endpoint...")
     getOrderTable().query(req.body.checkout_id)
     .then(data => { 
       if (data.Count == 0)

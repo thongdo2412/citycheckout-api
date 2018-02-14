@@ -7,7 +7,7 @@ module.exports = [{
   path: '/api/test',
   method: 'get',
   handler: (req, res) => {
-    console.log("test")
+    console.log("test endpoint")
     // // B-04504769AC0697338
     // let pBody = {}
     // pBody.METHOD = 'DoReferenceTransaction'

@@ -5,6 +5,7 @@ module.exports = [{
   path: '/api/postback',
   method: 'post',
   handler: (req, res) => {
+    console.log("Postback at end of funnel endpoint...")
     const checkoutID = req.body.checkoutID
     let payload = {}
     let click_id = ""
