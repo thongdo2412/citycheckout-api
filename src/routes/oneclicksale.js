@@ -3,9 +3,9 @@ module.exports = [{
   path: '/api/oneclicksale',
   method: 'post',
   handler: (req, res) => {
-    console.log("Upsell transaction endpoint...")
     const params = req.body
     if (params.gateway == 'cs') {
+      console.log("Upsell transaction in Cybersource endpoint...")
       const CS_URL = 'https://secureacceptance.cybersource.com/silent/pay'
       let CS_body = {}
       const signedDataFields = params.signed_field_names.split(',')
@@ -25,6 +25,7 @@ module.exports = [{
       })
     }
     else if (params.gateway == 'pp') {
+      console.log("Upsell transaction in Paypal endpoint...")      
       let pBody = {}
       let payload = {}
       let customer = {}
