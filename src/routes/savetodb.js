@@ -1,4 +1,4 @@
-const { responseError, responseSuccess, getOrderTable, constructShopifyBody, postToShopify, putToShopify } = require('../helpers/utils');
+const { responseError, responseSuccess, getOrderTable, constructShopifyBody, postToShopify, putToShopify, getCardName } = require('../helpers/utils');
 module.exports = [{
   path: '/api/savetodb',
   method: 'post',
@@ -15,6 +15,8 @@ module.exports = [{
       const amount = params.req_amount
       const click_id = params.req_merchant_defined_data6
       const phone = params.req_ship_to_phone
+      const card_number = params.req_card_number
+      const card_name = getCardName(params.req_card_type)
 
       let order_type = ""
       let tags = ""
@@ -22,6 +24,7 @@ module.exports = [{
       let line_items = []
       let tax_lines = []
       let variant_arr = []
+      let note_attributes = []
       let shopifyBody = {}
       let shopify_order_id = ""
       let shopify_order_name = ""
@@ -107,7 +110,9 @@ module.exports = [{
         line_items.push({"variant_id": params.req_merchant_defined_data7, "quantity": params.req_merchant_defined_data12})
       }
       tax_lines.push({"price": tax_amount, "rate": tax_rate, "title": "State tax"})
-      shopifyBody = constructShopifyBody(line_items,amount,customer,shipping_address,billing_address,tags,note,"CyberSource",tax_lines,customer.email,shipping_amount,product.discount_amount)
+      note_attributes.push({"name": "gateway","value": "CyberSource"},{"name": "card number","value": params.req_card_number},{"name": "card type","value": card_name})
+      shopifyBody = constructShopifyBody(line_items,amount,customer,shipping_address,billing_address,tags,note,note_attributes,tax_lines,customer.email,shipping_amount,product.discount_amount)
+      console.log("Create order to Shopify")
       postToShopify(shopifyURL,shopifyBody)
       .then (data => {
         shopify_order_id = data.order.id

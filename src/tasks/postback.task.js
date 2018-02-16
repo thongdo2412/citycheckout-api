@@ -42,7 +42,7 @@ class PostBackTask {
 
         orderPromises = grouped[name].map((item) => {
           let note = ""
-          if (data.Count > 1) {
+          if (grouped[name].length > 1) {
             if (item.order_type == "parent order") {
               note = `Upsell orders: ${child_nums}`
             }

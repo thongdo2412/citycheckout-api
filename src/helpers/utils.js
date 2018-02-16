@@ -70,7 +70,7 @@ function getDiscountCodes (discount_amt) {
   return discount_codes
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, gateway, tax_lines, customerEmail, ship_amount, discount_amt) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, note_attributes, tax_lines, customerEmail, ship_amount, discount_amt) {
   const shippinglines = getShippingLines(ship_amount)
   const discount_codes = getDiscountCodes(discount_amt)
 
@@ -91,12 +91,7 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
       "billing_address": billing,
       "tags": tags,
       "note": note,
-      "note_attributes": [
-        {
-          "name": "gateway",
-          "value": gateway
-        }
-      ],
+      "note_attributes": note_attributes,
       "discount_codes": discount_codes,
       "tax_lines": tax_lines,
       "total_discounts": discount_amt,
@@ -107,10 +102,6 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
   }
   return shopifyBody
 }
-
-// function postToThirdParties(shopifyURL,shopifyBody,cid,payout) {
-//   return Promise.all([postToShopify(shopifyURL,shopifyBody), postToVoluum(cid,payout)])
-// }
 
 function postToShopify(url,body) {
   const headers = {
@@ -223,6 +214,20 @@ function calShipping(data,amount) { // for paypal
   return rate
 }
 
+function getCardName(card_type) {
+  if (card_type == '001') {
+    return "Visa"
+  } else if (card_type == '002') {
+    return "Mastercard"
+  } else if (card_type == '003') {
+    return "American Express"
+  } else if (card_type == '004') {
+    return "Discover"
+  } else {
+    return "Not supported"
+  }
+}
+
 module.exports = {
   responseSuccess,
   responseError,
@@ -238,4 +243,5 @@ module.exports = {
   calTax,
   calShipping,
   getFrShopify,
+  getCardName,
 };

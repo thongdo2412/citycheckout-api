@@ -46,6 +46,7 @@ module.exports = [{
         nBody.PAYMENTREQUEST_0_TAXAMT = tax_amount.toFixed(2)
         nBody.PAYMENTREQUEST_0_AMT = total_amount.toFixed(2)
         nBody.PAYMENTREQUEST_0_CURRENCYCODE = 'USD'
+        console.log("Transaction sent to Paypal")
         return postToPayPal(nBody)  
     })
     .then(data => {
@@ -83,11 +84,14 @@ module.exports = [{
             let tags = payload2.PAYMENTINFO_0_TRANSACTIONID
             let line_items = []
             let tax_lines = []
+            let note_attributes = []
             let shopifyBody = {}
 
             line_items.push({"variant_id": productVariantId, "quantity": quantity})
             tax_lines.push({"price": payload2.PAYMENTINFO_0_TAXAMT, "rate": payload.tax_rate, "title": "State tax"})
-            shopifyBody = constructShopifyBody(line_items,payload2.PAYMENTINFO_0_AMT,payload.customer,payload.shipping_address,payload.billing_address,tags,"parent order","PayPal",tax_lines,payload.customer.email,payload.shipping_rate,discount_amt)
+            note_attributes.push({"name":"gateway","value":"PayPal"})
+            shopifyBody = constructShopifyBody(line_items,payload2.PAYMENTINFO_0_AMT,payload.customer,payload.shipping_address,payload.billing_address,tags,"parent order",note_attributes,tax_lines,payload.customer.email,payload.shipping_rate,discount_amt)
+            console.log("Create order to Shopify")            
             return postToShopify(shopifyURL,shopifyBody)
             .then (data => {
                 payload.shopify_order_id = data.order.id

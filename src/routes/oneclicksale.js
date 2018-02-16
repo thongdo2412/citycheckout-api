@@ -41,6 +41,7 @@ module.exports = [{
       pBody.TAXAMT = params.tax_amount
       item_amount = parseFloat(params.amount) - parseFloat(params.tax_amount)
       pBody.ITEMAMT = item_amount.toFixed(2)
+      console.log("Transaction sent to Paypal")
       postToPayPal(pBody)
       .then(data => {
         payload = strToJSON(data)
@@ -63,6 +64,7 @@ module.exports = [{
             let tags = payload.TRANSACTIONID
             let line_items = []
             let tax_lines = []
+            let note_attributes = []
             let shopifyBody = {}
             let variant_arr = []
             const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
@@ -77,7 +79,9 @@ module.exports = [{
               line_items.push({"variant_id": params.merchant_defined_data7, "quantity": params.merchant_defined_data12})
             }
             tax_lines.push({"price": params.tax_amount, "rate": params.merchant_defined_data11, "title": "State tax"})
-            shopifyBody = constructShopifyBody(line_items,payload.AMT,customer,shipping_address,billing_address,tags,"upsell order","PayPal",tax_lines,customer.email,params.merchant_defined_data8,params.merchant_defined_data13)
+            note_attributes.push({"name":"gateway","value":"PayPal"})
+            shopifyBody = constructShopifyBody(line_items,payload.AMT,customer,shipping_address,billing_address,tags,"upsell order",note_attributes,tax_lines,customer.email,params.merchant_defined_data8,params.merchant_defined_data13)
+            console.log("Create order to Shopify")
             return postToShopify(shopifyURL,shopifyBody)
           })
           .then(data => {

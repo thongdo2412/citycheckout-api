@@ -80,7 +80,7 @@ class DynamoTable {
       },
       ExpressionAttributeValues: {
         ":time": myStartDate
-      },
+      }
     }
     return db.scan(params).promise()
   }
