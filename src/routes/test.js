@@ -71,6 +71,7 @@ module.exports = [{
     })
     // .then(data => {
     //   console.log("enter update DB")
+    //   console.log(data)
     //   const dbItems = payload.Items.map((item) => {
     //     if (typeof item.sent_at === 'undefined') {
     //       return getOrderTable().updateSentField(item.key,item.date)
@@ -79,13 +80,13 @@ module.exports = [{
     //   return Promise.all(dbItems)
     // })
     // .then(data => {
+    //   console.log(data)
     //   const volItems = voluum_pb.map((item) =>{
     //     return postToVoluum(item.click_id,item.total_amount)
     //   })
     //   return Promise.all(volItems)
     //   console.log("end scheduled task postback...")
     // })
-    // .then(data=> responseSuccess(res,data))
     .catch(err => {
       console.log(err)
       responseError(res, err)

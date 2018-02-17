@@ -7,8 +7,9 @@ module.exports = [{
   handler: (req, res) => {
     console.log("checkexpired endpoint...")
     getOrderTable().query(req.body.checkout_id)
-    .then(data => { 
-      if (data.Count == 0)
+    .then(data => {
+      console.log(data) 
+      if (data.Count == 0 && data.ScannedCount != 0)
         return responseSuccess(res, {"expired": "true"})
       else 
         return responseSuccess(res, {"expired": "false"})
