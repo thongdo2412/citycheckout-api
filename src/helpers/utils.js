@@ -127,6 +127,19 @@ function putToShopify(url,body) {
   return httpReq(options)
 }
 
+function deleteToShopify(url) {
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Shopify-Access-Token": config.shopify.password
+  }
+  let options = {
+    method: 'DELETE',
+    uri: url,
+    headers: headers
+  }
+  return httpReq(options)
+}
+
 function getFrShopify(url) {
   const headers = {
     "Content-Type": "application/json",
