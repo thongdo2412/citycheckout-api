@@ -70,7 +70,7 @@ function getDiscountCodes (discount_amt) {
   return discount_codes
 }
 
-function constructShopifyBody (line_items, amount, customer, shipping, billing, tags, note, note_attributes, tax_lines, customerEmail, ship_amount, discount_amt) {
+function constructShopifyBody (line_items, amount, customer, shipping, billing, note, note_attributes, tax_lines, customerEmail, ship_amount, discount_amt, transaction_kind,financial_status) {
   const shippinglines = getShippingLines(ship_amount)
   const discount_codes = getDiscountCodes(discount_amt)
 
@@ -79,17 +79,18 @@ function constructShopifyBody (line_items, amount, customer, shipping, billing, 
       "line_items": line_items,
       "transactions": [
         {
-          "kind": "sale",
+          "kind": transaction_kind,
           "status": "success",
           "amount": amount
         }
       ],
+      "financial_status": financial_status,
       "shipping_lines": shippinglines,
       "customer": customer,
       "email": customerEmail,
       "shipping_address": shipping,
       "billing_address": billing,
-      "tags": tags,
+      // "tags": tags, remove tags for now, will add later if needed
       "note": note,
       "note_attributes": note_attributes,
       "discount_codes": discount_codes,
@@ -134,6 +135,7 @@ function getFrShopify(url) {
   let options = {
     uri: url,
     headers: headers,
+    resolveWithFullResponse: true,
     json: true
   }
   return httpReq(options)
@@ -228,6 +230,10 @@ function getCardName(card_type) {
   }
 }
 
+function getShopAPILimit(){
+  return getFrShopify("https://city-cosmetics.myshopify.com/admin/products/count.json")
+}
+
 module.exports = {
   responseSuccess,
   responseError,
@@ -244,4 +250,5 @@ module.exports = {
   calShipping,
   getFrShopify,
   getCardName,
+  getShopAPILimit,
 };

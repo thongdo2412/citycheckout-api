@@ -31,6 +31,8 @@ module.exports = [{
       let customer = {}
       let shipping_address = {}
       let billing_address = {}
+      let shopifyBody = {}
+      const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
       let item_amount = 0.0
       pBody.METHOD = 'DoReferenceTransaction'
       pBody.DESC = params.product_title
@@ -65,9 +67,7 @@ module.exports = [{
             let line_items = []
             let tax_lines = []
             let note_attributes = []
-            let shopifyBody = {}
             let variant_arr = []
-            const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
 
             variant_arr = params.merchant_defined_data7.split(",") // for color combo orders
             if (variant_arr.length > 1) {
@@ -81,9 +81,14 @@ module.exports = [{
             tax_lines.push({"price": params.tax_amount, "rate": params.merchant_defined_data11, "title": "State tax"})
             note_attributes.push({"name":"gateway","value":"PayPal"})
             shopifyBody = constructShopifyBody(line_items,payload.AMT,customer,shipping_address,billing_address,tags,"upsell order",note_attributes,tax_lines,customer.email,params.merchant_defined_data8,params.merchant_defined_data13)
+            
+            console.log("save to DB")
+            return getOrderTable().put(params.merchant_defined_data5,payload.AMT,"",customer,shipping_address,billing_address,payload.product,params.merchant_defined_data11,params.tax_amount,params.merchant_defined_data8,payload.TRANSACTIONID,"PayPal","upsell order",payload.shopify_order_id,payload.shopify_order_name)
+          })
+          .then(data => {
             console.log("Create order to Shopify")
             return postToShopify(shopifyURL,shopifyBody)
-          })
+          })            
           .then(data => {
             payload.shopify_order_id = data.order.id
             payload.shopify_order_name = data.order.name
@@ -102,9 +107,6 @@ module.exports = [{
             }
             const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${data.order.id}.json`;
             return putToShopify(order_url, order_body)
-          })
-          .then (data => {
-            return getOrderTable().put(params.merchant_defined_data5,payload.AMT,"",customer,shipping_address,billing_address,payload.product,params.merchant_defined_data11,params.tax_amount,params.merchant_defined_data8,payload.TRANSACTIONID,"PayPal","upsell order",payload.shopify_order_id,payload.shopify_order_name)
           })
         }
         else {

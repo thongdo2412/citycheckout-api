@@ -13,6 +13,7 @@ module.exports = [{
     let shipping_rate = 0.0
     let total_amount = 0.0
     const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
+    let shopifyBody = {}    
     const checkout_id = req.body.checkoutid
     const click_id = req.body.clickid
     const productVariantId = req.body.productVariantId
@@ -85,14 +86,18 @@ module.exports = [{
             let line_items = []
             let tax_lines = []
             let note_attributes = []
-            let shopifyBody = {}
 
             line_items.push({"variant_id": productVariantId, "quantity": quantity})
             tax_lines.push({"price": payload2.PAYMENTINFO_0_TAXAMT, "rate": payload.tax_rate, "title": "State tax"})
             note_attributes.push({"name":"gateway","value":"PayPal"})
             shopifyBody = constructShopifyBody(line_items,payload2.PAYMENTINFO_0_AMT,payload.customer,payload.shipping_address,payload.billing_address,tags,"parent order",note_attributes,tax_lines,payload.customer.email,payload.shipping_rate,discount_amt)
-            console.log("Create order to Shopify")            
-            return postToShopify(shopifyURL,shopifyBody)
+            
+            console.log("save to DB")
+            return getOrderTable().put(checkout_id,payload.total_amount,click_id,payload.customer,payload.shipping_address,payload.billing_address,payload.product,payload.tax_rate,payload.tax_amount,payload.shipping_rate,payload.transaction_id,"PayPal","parent order",payload.shopify_order_id,payload.shopify_order_name)
+            .then(data => {
+                console.log("Create order to Shopify")            
+                return postToShopify(shopifyURL,shopifyBody)
+            })
             .then (data => {
                 payload.shopify_order_id = data.order.id
                 payload.shopify_order_name = data.order.name
@@ -111,9 +116,6 @@ module.exports = [{
                   }
                 const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${data.order.id}.json`;
                 return putToShopify(order_url, order_body)
-            })
-            .then (data => {
-                return getOrderTable().put(checkout_id,payload.total_amount,click_id,payload.customer,payload.shipping_address,payload.billing_address,payload.product,payload.tax_rate,payload.tax_amount,payload.shipping_rate,payload.transaction_id,"PayPal","parent order",payload.shopify_order_id,payload.shopify_order_name)
             })
         }
         else {

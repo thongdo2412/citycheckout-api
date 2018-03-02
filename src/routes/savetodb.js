@@ -8,9 +8,10 @@ module.exports = [{
     let company = ""
     let billing_company = ""
     let ship_to_address_line2 = ""
-    let bill_to_address_line2 = "" 
+    let bill_to_address_line2 = ""
+    const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
+    let shopifyBody = {}     
     if (params.reason_code == '100') {
-      const shopifyURL = 'https://city-cosmetics.myshopify.com/admin/orders.json'
       const checkout_id = params.req_merchant_defined_data5
       const amount = params.req_amount
       const click_id = params.req_merchant_defined_data6
@@ -25,7 +26,6 @@ module.exports = [{
       let tax_lines = []
       let variant_arr = []
       let note_attributes = []
-      let shopifyBody = {}
       let shopify_order_id = ""
       let shopify_order_name = ""
 
@@ -87,13 +87,16 @@ module.exports = [{
       const tax_amount = params.req_tax_amount
       const tax_rate = params.req_merchant_defined_data11
       let pmt_token = ""
+
       if (params.payment_token) {
         pmt_token = params.payment_token
         order_type = "parent order"
         note = "parent order"
         tags = pmt_token
+        
       }
       else {
+
         pmt_token = params.req_payment_token
         order_type = "upsell order"
         note = "upsell order"
@@ -112,8 +115,13 @@ module.exports = [{
       tax_lines.push({"price": tax_amount, "rate": tax_rate, "title": "State tax"})
       note_attributes.push({"name": "gateway","value": "CyberSource"},{"name": "card number","value": params.req_card_number},{"name": "card type","value": card_name})
       shopifyBody = constructShopifyBody(line_items,amount,customer,shipping_address,billing_address,tags,note,note_attributes,tax_lines,customer.email,shipping_amount,product.discount_amount)
-      console.log("Create order to Shopify")
-      postToShopify(shopifyURL,shopifyBody)
+      
+      console.log("save to DB")
+      getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token, "CyberSource", order_type, shopify_order_id, shopify_order_name)      
+      .then(data => {
+        console.log("Create order to Shopify")
+        return postToShopify(shopifyURL,shopifyBody)
+      })
       .then (data => {
         shopify_order_id = data.order.id
         shopify_order_name = data.order.name
@@ -133,14 +141,16 @@ module.exports = [{
         const order_url = `https://city-cosmetics.myshopify.com/admin/orders/${data.order.id}.json`;
         return putToShopify(order_url, order_body)
       })
-      .then (data => {
-        return getOrderTable().put(checkout_id, amount, click_id, customer, shipping_address, billing_address, product, tax_rate, tax_amount, shipping_amount, pmt_token, "CyberSource", order_type, shopify_order_id, shopify_order_name)
-      })
       .then(data => responseSuccess(res, data))
       .catch((err) => {
         const body = { error_message: `Problem in creating transactions. ${err.display_message}` }
         responseError(res, body)
       })
+    }
+    else {
+      console.log(params.decision)
+      console.log(params.message)
+      responseError(res, {"transaction": "not successful"})
     }
   }
 }];
