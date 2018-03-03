@@ -1,5 +1,5 @@
 const Promise = require('bluebird')
-const { responseError, responseSuccess, postToPayPal, getOrderTable, strToJSON, calTax, calShipping, constructShopifyBody, postToShopify, putToShopify } = require('../helpers/utils')
+const { responseError, responseSuccess, getShopAPILimit, postToPayPal, getOrderTable, strToJSON, calTax, calShipping, constructShopifyBody, postToShopify, putToShopify } = require('../helpers/utils')
 const map = require('../resources/funnel_maps/funnel_map')
 module.exports = [{
   path: '/api/pexecbill',
@@ -38,7 +38,6 @@ module.exports = [{
         payload.tax_rate = tax_rate.toFixed(2)
         payload.total_amount = total_amount.toFixed(2)
 
-
         //for db storing
         payload.customer = {
             "first_name": payload.FIRSTNAME,
@@ -76,11 +75,28 @@ module.exports = [{
 
         shopifyBody = constructShopifyBody(line_items,payload.AMT,payload.customer,payload.shipping_address,payload.billing_address,"parent order",note_attributes,tax_lines,payload.customer.email,payload.shipping_rate,discount_amt,"authorization","pending")
 
-        console.log("Create order to Shopify")            
-        return postToShopify(shopifyURL,shopifyBody)
+        getShopAPILimit()
+        .then(data => {
+            let call_limit = data.headers.http_x_shopify_shop_api_call_limit.split("/")
+            let used_credit = parseInt(call_limit[0])
+            console.log(`used credit: ${used_credit}`)
+            if (used_credit >= 220){
+            setTimeout(function(){
+                console.log("Create order to Shopify")            
+                return postToShopify(shopifyURL,shopifyBody)
+                }, 10000)
+            }
+            else {
+                return postToShopify(shopifyURL,shopifyBody)
+            }
+        })
+        
     }).then(data => {
         shopifyOrderId = data.order.id
         shopifyOrderName = data.order.name
+
+        payload.shopify_order_id = data.order.id
+        payload.shopify_order_name = data.order.name
 
         let nBody = {}
         nBody.METHOD = 'DoExpressCheckoutPayment'
@@ -115,6 +131,8 @@ module.exports = [{
 
             .then(data => {
                 let tags = payload2.PAYMENTINFO_0_TRANSACTIONID
+
+
 
                 let order_body = {
                     "order": {
